@@ -1,0 +1,14 @@
+const fs = require("fs");
+const path = require("path");
+
+const logDir = path.join(__dirname, "../logs");
+
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir);
+}
+
+const logFile = path.join(logDir, "server.log");
+
+fs.appendFile(logFile, "Server started\n", (err) => {
+  if (err) console.error("Failed to write log:", err);
+});

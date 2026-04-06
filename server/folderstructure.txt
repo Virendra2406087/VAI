@@ -1,0 +1,136 @@
+client/
+│
+├── public/
+│   ├── favicon.ico
+│   └── index.html
+│
+├── src/
+│
+│   ├── assets/            # images, icons, logos
+│   │   ├── images
+│   │   └── icons
+│
+│   ├── components/        # reusable components
+│   │   ├── Navbar.jsx
+│   │   ├── Sidebar.jsx
+│   │   ├── Card.jsx
+│   │   ├── ProgressChart.jsx
+│   │   ├── Flashcard.jsx
+│   │   ├── QuizCard.jsx
+│   │   └── Loader.jsx
+│
+│   ├── pages/
+│   │
+│   │   ├── Dashboard/
+│   │   │   └── Dashboard.jsx
+│   │
+│   │   ├── Topics/
+│   │   │   ├── Topics.jsx
+│   │   │   └── CreateTopic.jsx
+│   │
+│   │   ├── Documentation/
+│   │   │   ├── Documentation.jsx
+│   │   │   └── Editor.jsx
+│   │
+│   │   ├── Flashcards/
+│   │   │   ├── Flashcards.jsx
+│   │   │   └── FlashcardViewer.jsx
+│   │
+│   │   ├── Quiz/
+│   │   │   ├── Quiz.jsx
+│   │   │   └── QuizResult.jsx
+│   │
+│   │   ├── Tutor/
+│   │   │   └── AITutor.jsx
+│   │
+│   │   ├── Planner/
+│   │   │   └── StudyPlanner.jsx
+│   │
+│   │   ├── Auth/
+│   │   │   ├── Login.jsx
+│   │   │   └── Register.jsx
+│   │
+│   │   └── Profile/
+│   │       └── Profile.jsx
+│
+│   ├── context/           # global state
+│   │   ├── AuthContext.js
+│   │   └── AppContext.js
+│
+│   ├── services/          # API calls
+│   │   ├── api.js
+│   │   ├── authService.js
+│   │   ├── topicService.js
+│   │   ├── flashcardService.js
+│   │   ├── quizService.js
+│   │   └── aiService.js
+│
+│   ├── hooks/             # custom hooks
+│   │   ├── useAuth.js
+│   │   └── useFetch.js
+│
+│   ├── utils/
+│   │   ├── constants.js
+│   │   └── helpers.js
+│
+│   ├── styles/
+│   │   └── global.css
+│
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── routes.jsx
+
+
+
+server/
+│
+├── config/
+│   ├── db.js
+│   └── aiConfig.js
+│
+├── controllers/
+│   ├── authController.js
+│   ├── topicController.js
+│   ├── documentationController.js
+│   ├── flashcardController.js
+│   ├── quizController.js
+│   ├── tutorController.js
+│   └── plannerController.js
+│
+├── models/
+│   ├── User.js
+│   ├── Topic.js
+│   ├── Documentation.js
+│   ├── Flashcard.js
+│   ├── Quiz.js
+│   └── StudyPlan.js
+│
+├── routes/
+│   ├── authRoutes.js
+│   ├── topicRoutes.js
+│   ├── documentationRoutes.js
+│   ├── flashcardRoutes.js
+│   ├── quizRoutes.js
+│   ├── tutorRoutes.js
+│   └── plannerRoutes.js
+│
+├── middleware/
+│   ├── authMiddleware.js
+│   ├── errorMiddleware.js
+│   └── rateLimit.js
+│
+├── services/
+│   ├── aiService.js
+│   ├── flashcardGenerator.js
+│   ├── quizGenerator.js
+│   └── documentationGenerator.js
+│
+├── utils/
+│   ├── logger.js
+│   └── response.js
+│
+├── socket/                # real-time features
+│   └── socketServer.js
+│
+├── server.js
+└── package.json
