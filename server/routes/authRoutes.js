@@ -10,7 +10,7 @@ const {
   getProfile,
   getProfileByEmail,
   changePassword,
-} = require("../controllers/authController");
+} = require("../Controllers/authController");
 
 // ── Standard auth ──
 router.post("/register",        registerUser);
