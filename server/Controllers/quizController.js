@@ -1,22 +1,23 @@
 // server/controllers/quizController.js
-const Quiz = require("../models/Quiz");
-const { generateWithGemini } = require("../config/aiConfig"); // ✅ new SDK
+const Quiz         = require("../models/Quiz");
+const { generateWithGemini } = require("../config/aiConfig");
+const { saveEvent } = require("./historyController");
+const jwt           = require("jsonwebtoken");
 
-// ✅ AI GENERATE QUIZ
+const getUserId = (req) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    return token ? jwt.verify(token, process.env.JWT_SECRET).id : null;
+  } catch { return null; }
+};
+
 exports.generateQuiz = async (req, res) => {
   try {
     const { topic } = req.body;
-
-    if (!topic) {
-      return res.status(400).json({
-        success: false,
-        message: "Topic is required",
-      });
-    }
+    if (!topic) return res.status(400).json({ success: false, message: "Topic is required" });
 
     const prompt = `
 Generate 5 multiple choice quiz questions about: ${topic}
-
 Return ONLY a valid JSON array with no extra text, no markdown, no code fences:
 [
   {
@@ -26,7 +27,6 @@ Return ONLY a valid JSON array with no extra text, no markdown, no code fences:
     "explanation": "short explanation why this is correct"
   }
 ]
-
 Rules:
 - options array must have exactly 4 items
 - correctAnswer must exactly match one of the options
@@ -34,63 +34,46 @@ Rules:
 `;
 
     const text = await generateWithGemini(prompt);
-
     let questions = [];
-
     try {
-      const cleanText = text
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim();
-
+      const cleanText = text.replace(/```json/g, "").replace(/```/g, "").trim();
       questions = JSON.parse(cleanText);
-
-      if (!Array.isArray(questions)) {
-        throw new Error("Response is not an array");
-      }
-
-    } catch (err) {
-      console.error("❌ JSON parse error:", err);
-      console.error("Raw AI text:", text);
-      return res.status(500).json({
-        success: false,
-        message: "AI returned invalid JSON. Try again.",
-      });
+      if (!Array.isArray(questions)) throw new Error("Not an array");
+    } catch {
+      return res.status(500).json({ success: false, message: "AI returned invalid JSON. Try again." });
     }
 
-    // ✅ Save to MongoDB
+    // ✅ Save userId with every quiz question
+    const userId = getUserId(req);
     const saved = await Quiz.insertMany(
       questions.map((q) => ({
-        question: q.question,
-        options: q.options,
+        question:      q.question,
+        options:       q.options,
         correctAnswer: q.correctAnswer,
-        explanation: q.explanation || "",
+        explanation:   q.explanation || "",
+        topic,
+        userId: userId || null, // ✅ attach userId
       }))
     );
 
-    res.json({
-      success: true,
-      data: saved,
-    });
-
-  } catch (error) {
-    console.error("❌ ERROR:", error);
-
-    if (error.status === 429) {
-      return res.status(429).json({
-        success: false,
-        message: "AI quota exceeded. Please try again later.",
+    if (userId) {
+      await saveEvent({
+        userId,
+        type:       "quiz",
+        title:      `Quiz: ${topic}`,
+        detail:     `Generated ${saved.length} questions on "${topic}"`,
+        resourceId: saved[0]?._id?.toString() || "",
+        meta:       { topic, count: saved.length },
       });
     }
 
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.json({ success: true, data: saved });
+  } catch (error) {
+    if (error.status === 429) return res.status(429).json({ success: false, message: "AI quota exceeded." });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// ✅ GET ALL QUIZZES
 exports.getQuizzes = async (req, res) => {
   try {
     const { topicId } = req.query;
@@ -101,11 +84,53 @@ exports.getQuizzes = async (req, res) => {
   }
 };
 
-// ✅ DELETE QUIZ
+exports.getQuizByTopic = async (req, res) => {
+  try {
+    const topic = decodeURIComponent(req.params.topic);
+    const quizzes = await Quiz.find(
+      { topic: { $regex: topic, $options: "i" } }
+    ).sort({ createdAt: -1 }).limit(20);
+    if (!quizzes.length) return res.status(404).json({ success: false, message: "No quizzes found for this topic" });
+    res.json({ success: true, data: quizzes });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 exports.deleteQuiz = async (req, res) => {
   try {
     await Quiz.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: "Quiz deleted" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ✅ Called when user submits a quiz — saves score for real accuracy calculation
+exports.submitQuizResult = async (req, res) => {
+  try {
+    const { topic, score, total } = req.body;
+    const userId = getUserId(req);
+
+    // ✅ Update the quiz questions for this topic with the score
+    if (userId && score !== undefined && total !== undefined) {
+      await Quiz.updateMany(
+        { topic: { $regex: topic, $options: "i" }, userId },
+        { $set: { score, total } }
+      );
+    }
+
+    if (userId) {
+      await saveEvent({
+        userId,
+        type:   "quiz",
+        title:  `Quiz Result: ${topic}`,
+        detail: `Scored ${score}/${total} on "${topic}"`,
+        meta:   { topic, score, total },
+      });
+    }
+
+    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

@@ -1,5 +1,7 @@
 // server/controllers/tutorController.js
 const { GoogleGenAI } = require("@google/genai");
+const { saveEvent }   = require("./historyController");
+const jwt             = require("jsonwebtoken");
 
 if (!process.env.GEMINI_API_KEY) {
   console.error("❌ GEMINI_API_KEY is missing from .env");
@@ -19,6 +21,13 @@ If an image is provided, analyze it thoroughly and answer the question about it.
 If a file is provided, use its content to inform your answer.
 Always produce visual, readable, book-quality output.`;
 
+const getUserId = (req) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    return token ? jwt.verify(token, process.env.JWT_SECRET).id : null;
+  } catch { return null; }
+};
+
 exports.askTutor = async (req, res) => {
   try {
     const { question, attachments } = req.body;
@@ -28,60 +37,58 @@ exports.askTutor = async (req, res) => {
     }
 
     const hasAttachments = attachments && attachments.length > 0;
+    let answer = "";
 
     if (hasAttachments) {
-      // ✅ Correct format for @google/genai SDK multimodal
       const parts = [];
-
-      // System instruction first
       parts.push({ text: SYSTEM_PROMPT });
 
-      // Add each attachment as correct part type
       for (const att of attachments) {
         if (att.isImage) {
-          // ✅ Image part — correct SDK format
-          parts.push({
-            inlineData: {
-              mimeType: att.type,
-              data:     att.base64,   // raw base64 string (no data: prefix)
-            }
-          });
+          parts.push({ inlineData: { mimeType: att.type, data: att.base64 } });
         } else {
-          // ✅ Text file — decode base64 to text and inject
           try {
             const decoded = Buffer.from(att.base64, "base64").toString("utf-8");
-            parts.push({
-              text: `\n--- Uploaded file: ${att.name} ---\n${decoded.slice(0, 4000)}\n--- End of file ---\n`
-            });
+            parts.push({ text: `\n--- Uploaded file: ${att.name} ---\n${decoded.slice(0, 4000)}\n--- End of file ---\n` });
           } catch (e) {
             parts.push({ text: `\n[Could not read file: ${att.name}]\n` });
           }
         }
       }
 
-      // User question
       parts.push({
         text: question
           ? `Student question: ${question}`
           : "Please analyze the uploaded content and provide a detailed explanation."
       });
 
-      // ✅ Correct API call for new SDK with parts array
       const response = await ai.models.generateContent({
         model:    "gemini-2.5-flash",
         contents: [{ role: "user", parts }],
       });
-
-      return res.json({ answer: response.text });
+      answer = response.text;
+    } else {
+      const response = await ai.models.generateContent({
+        model:    "gemini-2.5-flash",
+        contents: `${SYSTEM_PROMPT}\n\nStudent question: ${question}`,
+      });
+      answer = response.text;
     }
 
-    // ✅ Text only
-    const response = await ai.models.generateContent({
-      model:    "gemini-2.5-flash",
-      contents: `${SYSTEM_PROMPT}\n\nStudent question: ${question}`,
-    });
+    // ── Save to history ──
+    const userId = getUserId(req);
+    if (userId && question) {
+      const shortQ = question.length > 80 ? question.slice(0, 80) + "…" : question;
+      await saveEvent({
+        userId,
+        type:   "tutor",
+        title:  `AI Tutor: ${shortQ}`,
+        detail: answer.slice(0, 400),
+        meta:   { question: shortQ },
+      });
+    }
 
-    res.json({ answer: response.text });
+    res.json({ answer });
 
   } catch (error) {
     console.error("❌ Tutor Error:", error);

@@ -1,20 +1,19 @@
 // server/routes/flashcardRoutes.js
 const express = require("express");
-const router = express.Router();
-
+const router  = express.Router();
 const {
   createFlashcard,
   getFlashcards,
+  getFlashcardsByTopic,
   deleteFlashcard,
   generateFlashcards,
 } = require("../controllers/flashcardController");
 
-// ✅ AI route MUST be before "/:id" routes to avoid conflict
-router.post("/generate", generateFlashcards);
-
-// CRUD
-router.post("/", createFlashcard);
-router.get("/", getFlashcards);
-router.delete("/:id", deleteFlashcard);
+// ⚠️ specific routes BEFORE /:id
+router.post("/generate",       generateFlashcards);
+router.get("/topic/:topic",    getFlashcardsByTopic); // GET /api/flashcards/topic/Binary+Search
+router.post("/",               createFlashcard);
+router.get("/",                getFlashcards);
+router.delete("/:id",          deleteFlashcard);
 
 module.exports = router;

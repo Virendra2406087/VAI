@@ -1,12 +1,19 @@
 // server/routes/quizRoutes.js
 const express = require("express");
-const router = express.Router();
+const router  = express.Router();
+const {
+  generateQuiz,
+  getQuizzes,
+  getQuizByTopic,
+  deleteQuiz,
+  submitQuizResult,
+} = require("../controllers/quizController");
 
-const quizController = require("../controllers/quizController");
-
-// ✅ AI generate route FIRST (before /:id)
-router.post("/generate", quizController.generateQuiz);
-router.get("/", quizController.getQuizzes);
-router.delete("/:id", quizController.deleteQuiz);
+// ⚠️ specific routes BEFORE /:id
+router.post("/generate",       generateQuiz);
+router.post("/submit",         submitQuizResult);
+router.get("/topic/:topic",    getQuizByTopic);   // GET /api/quiz/topic/Binary+Search
+router.get("/",                getQuizzes);
+router.delete("/:id",          deleteQuiz);
 
 module.exports = router;

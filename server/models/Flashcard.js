@@ -7,6 +7,18 @@ const flashcardSchema = new mongoose.Schema(
       ref: "Topic",
     },
 
+    // ✅ Added userId so dashboard can filter by user
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    topic: {
+      type: String,
+      default: "",
+    },
+
     question: {
       type: String,
       required: true,

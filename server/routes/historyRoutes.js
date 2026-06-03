@@ -1,0 +1,9 @@
+// server/routes/historyRoutes.js
+const express = require("express");
+const router  = express.Router();
+const { getHistory, addHistoryEvent } = require("../controllers/historyController");
+
+router.get("/",  getHistory);
+router.post("/", addHistoryEvent);
+
+module.exports = router;

@@ -1,5 +1,5 @@
 // server/config/aiConfig.js
-const { GoogleGenAI } = require("@google/genai"); // ✅ NEW SDK (not @google/generative-ai)
+const { GoogleGenAI } = require("@google/genai");
 
 if (!process.env.GEMINI_API_KEY) {
   console.error("❌ GEMINI_API_KEY is missing from .env");
@@ -7,14 +7,69 @@ if (!process.env.GEMINI_API_KEY) {
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// ✅ Generate content using new SDK
-const generateWithGemini = async (prompt) => {
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash", // ✅ current free tier model (March 2026)
-    contents: prompt,
-  });
+// ── Models to try in order ──
+const MODELS = [
+  "gemini-2.5-flash",
+  "gemini-2.0-flash",
+  "gemini-1.5-flash",
+  "gemini-1.5-flash-8b",
+];
 
-  return response.text;
+// ── Wait helper ──
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// ── Generate with retry + model fallback ──
+const generateWithGemini = async (prompt, retries = 3) => {
+  let lastError;
+
+  for (const model of MODELS) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        console.log(`🤖 Trying model: ${model} (attempt ${attempt})`);
+
+        const response = await ai.models.generateContent({
+          model,
+          contents: prompt,
+        });
+
+        console.log(`✅ Success with model: ${model}`);
+        return response.text;
+
+      } catch (error) {
+        lastError = error;
+        const status = error.status || error.code;
+
+        // ── 503 / 429 → retry with backoff ──
+        if (status === 503 || status === 429 || error.message?.includes("UNAVAILABLE") || error.message?.includes("overloaded")) {
+          const delay = attempt * 2000; // 2s, 4s, 6s
+          console.warn(`⚠️  Model ${model} unavailable (attempt ${attempt}/${retries}). Retrying in ${delay/1000}s...`);
+          await wait(delay);
+          continue;
+        }
+
+        // ── 400 bad request → skip this model ──
+        if (status === 400) {
+          console.warn(`⚠️  Model ${model} bad request. Trying next model...`);
+          break;
+        }
+
+        // ── 401 invalid key → throw immediately ──
+        if (status === 401) {
+          throw new Error("Invalid Gemini API key. Check your .env file.");
+        }
+
+        // ── Other error → try next model ──
+        console.warn(`⚠️  Model ${model} failed: ${error.message}. Trying next model...`);
+        break;
+      }
+    }
+  }
+
+  // All models failed
+  const status = lastError?.status || lastError?.code;
+  if (status === 503) throw { status: 503, message: "Gemini is overloaded right now. Please try again in a minute." };
+  if (status === 429) throw { status: 429, message: "AI quota exceeded. Please try again later." };
+  throw lastError || new Error("All AI models failed.");
 };
 
 module.exports = { generateWithGemini };

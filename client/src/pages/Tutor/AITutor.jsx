@@ -93,12 +93,37 @@ function FileBubble({ file, previewUrl }) {
   );
 }
 
+
+// ── Chat cache helpers ──
+const getChatKey = () => {
+  const uid = localStorage.getItem("userId") || "guest";
+  return "vai_tutor_" + uid;
+};
+const loadChat = () => {
+  try {
+    const raw = localStorage.getItem(getChatKey());
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+};
+const saveChat = (msgs) => {
+  try { localStorage.setItem(getChatKey(), JSON.stringify(msgs.slice(-50))); }
+  catch {}
+};
+const clearChat = () => {
+  try { localStorage.removeItem(getChatKey()); }
+  catch {}
+};
+
 // ── Main component ──
 export default function AITutor() {
-  const [messages, setMessages] = useState([{
+  const WELCOME = {
     role:"ai",
     content:"Hello 👋 I'm **VAI Tutor**. You can:\n\n- 💬 **Ask any question** — DSA, physics, math, code\n- 🖼️ **Upload an image** — I'll analyze it and answer\n- 📄 **Upload a file** — PDF or TXT for context\n- 📐 **Ask for diagrams** — SVG diagrams rendered visually\n- 🧮 **Request formulas** — Beautiful LaTeX math rendering",
-  }]);
+  };
+  const [messages, setMessages] = useState(() => {
+    const cached = loadChat();
+    return cached?.length > 0 ? cached : [WELCOME];
+  });
   const [input,      setInput]      = useState("");
   const [typing,     setTyping]     = useState(false);
   const [error,      setError]      = useState("");
@@ -141,7 +166,11 @@ export default function AITutor() {
     setInput(""); setFiles([]); setError(""); setTyping(true);
 
     // Add user message to chat
-    setMessages(p => [...p, { role:"user", content:q, files:sentFiles }]);
+    setMessages(p => {
+      const updated = [...p, { role:"user", content:q, files:sentFiles }];
+      saveChat(updated);
+      return updated;
+    });
 
     try {
       // Build request — include files if any
@@ -161,7 +190,11 @@ export default function AITutor() {
 
       const res = await axios.post("http://localhost:5000/api/tutor/ask", payload);
       const answer = res.data.answer;
-      setMessages(p => [...p, { role:"ai", content:answer }]);
+      setMessages(p => {
+        const updated = [...p, { role:"ai", content:answer }];
+        saveChat(updated);
+        return updated;
+      });
       if (q) trackTutor(q, answer);
 
     } catch(err) {
@@ -176,7 +209,9 @@ export default function AITutor() {
   const onKey = (e) => { if (e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();} };
 
   const clear = () => {
-    setMessages([{role:"ai",content:"Hello 👋 Ask me anything, or upload an image/file!"}]);
+    const welcome = {role:"ai",content:"Hello 👋 Ask me anything, or upload an image/file!"};
+    setMessages([welcome]);
+    saveChat([welcome]);
     setError(""); setFiles([]);
   };
 

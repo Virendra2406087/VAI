@@ -29,26 +29,22 @@ export default function LandingPage() {
 
   return (
     <div style={styles.root}>
-
-      {/* ─── CURSOR GLOW ─── */}
       <div style={{
         ...styles.cursorGlow,
         left: mousePos.x - 200,
         top: mousePos.y - 200,
       }} />
 
-      {/* ─── GRID OVERLAY ─── */}
       <div style={styles.grid} />
 
-      {/* ─── NAVBAR ─── */}
       <nav style={{
         ...styles.nav,
         background: scrollY > 40 ? "rgba(8,8,16,0.9)" : "transparent",
         borderBottom: scrollY > 40 ? "1px solid rgba(255,255,255,0.06)" : "1px solid transparent",
       }}>
         <div style={styles.navLogo}>
-          <img src="/VAI.jpeg" alt="VAI" style={{ width:34, height:34, borderRadius:9, objectFit:"cover" }} />
-          <span style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800, background:"linear-gradient(135deg,#a855f7,#7c3aed)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>VAI</span>
+          <img src="/VAI.jpeg" alt="VAI" style={{ width: 34, height: 34, borderRadius: 9, objectFit: "cover" }} />
+          <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, background: "linear-gradient(135deg,#a855f7,#7c3aed)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>VAI</span>
         </div>
         <div style={styles.navActions}>
           <button style={styles.btnOutline} onClick={() => navigate("/login")}>Sign In</button>
@@ -56,9 +52,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* ─── HERO ─── */}
       <section ref={heroRef} style={styles.hero}>
-
         <div style={styles.heroBadge}>
           <span style={styles.badgeDot} />
           Powered by Gemini AI · VAI
@@ -84,7 +78,6 @@ export default function LandingPage() {
           </button>
         </div>
 
-        {/* FLOATING CARDS */}
         <div style={styles.floatRow}>
           <div style={{ ...styles.floatCard, animationDelay: "0s" }}>
             <span style={styles.floatIcon}>📄</span>
@@ -113,7 +106,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── FEATURES ─── */}
       <section id="features" style={styles.section}>
         <div style={styles.sectionTag}>Features</div>
         <h2 style={styles.sectionTitle}>Everything you need to <span style={styles.heroGradient}>master any topic</span></h2>
@@ -148,7 +140,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── CTA SECTION ─── */}
       <section style={styles.ctaSection}>
         <div style={styles.ctaGlow} />
         <div style={styles.ctaContent}>
@@ -161,11 +152,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── FOOTER ─── */}
       <footer style={styles.footer}>
         <div style={styles.footerLogo}>
-          <img src="/VAI.jpeg" alt="VAI" style={{ width:28, height:28, borderRadius:7, objectFit:"cover" }} />
-          <span style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:800, background:"linear-gradient(135deg,#a855f7,#7c3aed)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>VAI</span>
+          <img src="/VAI.jpeg" alt="VAI" style={{ width: 28, height: 28, borderRadius: 7, objectFit: "cover" }} />
+          <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 18, fontWeight: 800, background: "linear-gradient(135deg,#a855f7,#7c3aed)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>VAI</span>
         </div>
         <p style={styles.footerText}>© 2026 VAI.</p>
         <div style={styles.footerLinks}>
@@ -175,7 +165,6 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* ─── KEYFRAMES ─── */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -229,8 +218,6 @@ const styles = {
     pointerEvents: "none",
     zIndex: 0,
   },
-
-  /* NAV */
   nav: {
     position: "fixed", top: 0, left: 0, right: 0,
     zIndex: 1000,
@@ -241,7 +228,7 @@ const styles = {
   },
   navLogo: { display: "flex", alignItems: "center", gap: 8 },
   logoIcon: { fontSize: 22 },
-  logoImg: { width:34, height:34, borderRadius:8, objectFit:'cover', border:'1px solid rgba(124,58,237,0.3)' },
+  logoImg: { width: 34, height: 34, borderRadius: 8, objectFit: "cover", border: "1px solid rgba(124,58,237,0.3)" },
   logoText: { fontFamily: "'Syne', sans-serif", fontSize: 22, fontWeight: 800, color: "#f1f5f9" },
   logoPurple: { color: "#a855f7" },
   navLinks: { display: "flex", gap: 36 },
@@ -267,8 +254,6 @@ const styles = {
     transition: "all 0.2s",
     fontFamily: "'DM Sans', sans-serif",
   },
-
-  /* HERO */
   hero: {
     position: "relative", zIndex: 1,
     minHeight: "100vh",
@@ -343,8 +328,6 @@ const styles = {
     fontFamily: "'DM Sans', sans-serif",
   },
   btnArrow: { fontSize: 18, display: "inline-block" },
-
-  /* FLOATING CARDS */
   floatRow: {
     display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center",
     animation: "fadeUp 0.7s ease 0.45s both",
@@ -362,8 +345,6 @@ const styles = {
   floatTitle: { fontSize: 13, fontWeight: 700, color: "#e2e8f0" },
   floatSub: { fontSize: 11, color: "#64748b", marginTop: 2 },
   floatCheck: { fontSize: 16, color: "#a855f7", fontWeight: 800, marginLeft: 8 },
-
-  /* STATS */
   statsSection: {
     position: "relative", zIndex: 1,
     borderTop: "1px solid rgba(255,255,255,0.06)",
@@ -383,8 +364,6 @@ const styles = {
     WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
   },
   statLabel: { fontSize: 14, color: "#64748b", marginTop: 6, fontWeight: 500 },
-
-  /* SECTIONS */
   section: {
     position: "relative", zIndex: 1,
     padding: "100px 60px",
@@ -407,8 +386,6 @@ const styles = {
     fontSize: 17, color: "#64748b", maxWidth: 520,
     margin: "0 auto 56px", lineHeight: 1.7,
   },
-
-  /* FEATURES */
   featuresGrid: {
     display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
     gap: 20, maxWidth: 960, margin: "0 auto",
@@ -432,8 +409,6 @@ const styles = {
     fontSize: 17, fontWeight: 700, color: "#f1f5f9", marginBottom: 10,
   },
   featureDesc: { fontSize: 14, color: "#64748b", lineHeight: 1.7 },
-
-  /* HOW IT WORKS */
   stepsGrid: {
     display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
     gap: 24, maxWidth: 860, margin: "0 auto",
@@ -463,8 +438,6 @@ const styles = {
     fontSize: 24, color: "rgba(124,58,237,0.4)",
     zIndex: 2,
   },
-
-  /* TESTIMONIALS */
   testimonialsGrid: {
     display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
     gap: 20, maxWidth: 960, margin: "0 auto",
@@ -494,8 +467,6 @@ const styles = {
   },
   authorName: { fontSize: 14, fontWeight: 700, color: "#e2e8f0" },
   authorRole: { fontSize: 12, color: "#475569", marginTop: 2 },
-
-  /* CTA */
   ctaSection: {
     position: "relative", zIndex: 1,
     padding: "100px 60px",
@@ -522,8 +493,6 @@ const styles = {
     fontSize: 17, color: "#64748b", maxWidth: 480,
     margin: "0 auto 36px", lineHeight: 1.7,
   },
-
-  /* FOOTER */
   footer: {
     position: "relative", zIndex: 1,
     padding: "32px 60px",

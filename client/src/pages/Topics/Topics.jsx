@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { addNotification } from "../../utils/notifications";
+import { trackTopic } from "../../utils/history";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 
@@ -51,6 +52,7 @@ function Topics() {
       if (data.success) {
         setShowModal(false); setNewTitle(""); setNewDesc(""); fetchTopics();
         addNotification("📚", `New topic created: "${newTitle.trim()}"`, "topic");
+        trackTopic(newTitle.trim());
       }
       else { setError(data.message); }
     } catch { setError("Failed to create topic."); }
@@ -157,9 +159,9 @@ function Topics() {
                     </div>
 
                     <div style={{ display:"flex", gap:8 }}>
-                      <button style={{ ...S.actionBtn, background:`linear-gradient(135deg,${color},${color}cc)` }} onClick={() => navigate("/docs",       { state:{ topic: topic.title } })}>📄 Docs</button>
-                      <button style={S.ghostBtn}                                                                  onClick={() => navigate("/flashcards",   { state:{ topic: topic.title } })}>🃏 Cards</button>
-                      <button style={S.ghostBtn}                                                                  onClick={() => navigate("/quiz",         { state:{ topic: topic.title } })}>🧠 Quiz</button>
+                      <button style={{ ...S.actionBtn, background:`linear-gradient(135deg,${color},${color}cc)` }} onClick={() => navigate("/docs/view",       { state:{ topic: topic.title, autoGenerate: true } })}>📄 Docs</button>
+                      <button style={S.ghostBtn}                                                                  onClick={() => navigate("/flashcards/view", { state:{ topic: topic.title, autoGenerate: true } })}>🃏 Cards</button>
+                      <button style={S.ghostBtn}                                                                  onClick={() => navigate("/quiz/view",       { state:{ topic: topic.title, autoGenerate: true } })}>🧠 Quiz</button>
                     </div>
                   </div>
                 );

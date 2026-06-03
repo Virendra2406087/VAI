@@ -1,15 +1,15 @@
 require("dotenv").config();
 
-const express = require("express");
-const http    = require("http");
-const cors    = require("cors");
-const morgan  = require("morgan");
+const express  = require("express");
+const http     = require("http");
+const cors     = require("cors");
+const morgan   = require("morgan");
 const mongoose = require("mongoose");
 
-const logger       = require("./utils/logger");
-const passport     = require("./config/passport");
-const session      = require("express-session");
-const apiLimiter   = require("./middleware/rateLimit");
+const logger     = require("./utils/logger");
+const passport   = require("./config/passport");
+const session    = require("express-session");
+const apiLimiter = require("./middleware/rateLimit");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const { initSocket } = require("./socket/socketServer");
 
@@ -22,6 +22,7 @@ const flashcardRoutes     = require("./routes/flashcardRoutes");
 const quizRoutes          = require("./routes/quizRoutes");
 const tutorRoutes         = require("./routes/tutorRoutes");
 const plannerRoutes       = require("./routes/plannerRoutes");
+const historyRoutes       = require("./routes/historyRoutes"); // ✅ NEW
 
 const app    = express();
 const server = http.createServer(app);
@@ -43,8 +44,8 @@ app.use(morgan("dev"));
 app.use("/api", apiLimiter);
 
 // ── API Routes ──
-app.use("/api/auth",       authRoutes);       // ✅ /api/auth/register  /api/auth/login
-app.use("/api/user",       authRoutes);       // ✅ /api/user/profile/:email  /api/user/change-password
+app.use("/api/auth",       authRoutes);
+app.use("/api/user",       authRoutes);
 app.use("/api/dashboard",  dashboardRoutes);
 app.use("/api/topics",     topicRoutes);
 app.use("/api/docs",       documentationRoutes);
@@ -52,6 +53,7 @@ app.use("/api/flashcards", flashcardRoutes);
 app.use("/api/quiz",       quizRoutes);
 app.use("/api/tutor",      tutorRoutes);
 app.use("/api/planner",    plannerRoutes);
+app.use("/api/history",    historyRoutes); // ✅ NEW
 
 // ── Health ──
 app.get("/", (req, res) => res.json({ status: "Server running", version: "1.0.0" }));

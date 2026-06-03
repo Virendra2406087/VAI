@@ -20,31 +20,41 @@ router.get("/profile/:email",   getProfileByEmail);
 router.put("/change-password",  changePassword);
 
 // ── Google OAuth ──
-// Step 1: redirect to Google
 router.get("/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-// Step 2: Google redirects back here
-router.get("/google/callback",
-  passport.authenticate("google", { failureRedirect: "http://localhost:5173/login?error=google_failed", session: false }),
-  (req, res) => {
-    // ✅ Generate JWT for the Google user
+// ── Google Callback — manual authenticate for better error handling ──
+router.get("/google/callback", (req, res, next) => {
+  passport.authenticate("google", { session: false }, (err, user, info) => {
+    // ✅ Log everything so we can see what's failing
+    if (err) {
+      console.error("❌ Google OAuth error:", err);
+      return res.redirect("http://localhost:5173/login?error=google_failed");
+    }
+
+    if (!user) {
+      console.error("❌ Google OAuth no user — info:", info);
+      return res.redirect("http://localhost:5173/login?error=google_failed");
+    }
+
+    console.log("✅ Google OAuth success — user:", user.email);
+
+    // Generate JWT
     const token = jwt.sign(
-      { id: req.user._id },
+      { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // ✅ Redirect to frontend with token + user info in URL
-    const name  = encodeURIComponent(req.user.name);
-    const email = encodeURIComponent(req.user.email);
-    const id    = encodeURIComponent(req.user._id);
+    const name  = encodeURIComponent(user.name  || "");
+    const email = encodeURIComponent(user.email || "");
+    const id    = encodeURIComponent(user._id.toString());
 
-    res.redirect(
+    return res.redirect(
       `http://localhost:5173/auth/google/success?token=${token}&name=${name}&email=${email}&id=${id}`
     );
-  }
-);
+  })(req, res, next);
+});
 
 module.exports = router;
