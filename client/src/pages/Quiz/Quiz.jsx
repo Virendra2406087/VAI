@@ -240,11 +240,6 @@ useEffect(() => {
                       <h2>Quiz</h2>
                       <h3 style={{ display:"flex", alignItems:"center", gap:10 }}>
                         {topic}
-                        {cachedAt && (
-                          <span style={{ fontSize:11, color:"#10b981", background:"rgba(16,185,129,0.1)", border:"1px solid rgba(16,185,129,0.25)", borderRadius:100, padding:"2px 10px", fontWeight:600 }}>
-                            ✅ Cached
-                          </span>
-                        )}
                       </h3>
                     </div>
 

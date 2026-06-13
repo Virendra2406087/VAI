@@ -37,7 +37,7 @@ function Flashcards() {
   const [hard,     setHard]     = useState(0);
   const [cachedAt, setCachedAt] = useState(null);
 
-  // ✅ Load cache first, auto-generate only if no cache
+
   useEffect(() => {
     if (!topic) return;
     const cached = loadFlashCache(topic);
@@ -70,8 +70,7 @@ function Flashcards() {
     setIndex(0); setFlipped(false);
   };
 
-  // ── Generate (both first time and "more") ──
-  // ✅ isMore=true → don't track in history (avoids duplicate)
+
   const generateAI = async (isMore = false) => {
     try {
       setLoading(true); setError("");
@@ -95,7 +94,7 @@ function Flashcards() {
         });
         addNotification("🃏", `${data.data.length} flashcards generated for "${topic}"`, "flashcard");
 
-        // ✅ Only track on first generate — not when adding more
+
         if (!isMore) {
           trackFlashcard(topic, data.data.length);
         }
@@ -139,11 +138,7 @@ function Flashcards() {
             <div className="flash-topic">
               <h3 style={{ display:"flex", alignItems:"center", gap:10 }}>
                 {topic}
-                {cachedAt && (
-                  <span style={{ fontSize:11, color:"#10b981", background:"rgba(16,185,129,0.1)", border:"1px solid rgba(16,185,129,0.25)", borderRadius:100, padding:"2px 10px", fontWeight:600 }}>
-                    ✅ Cached
-                  </span>
-                )}
+                
               </h3>
               <p>{studied} / {total} Cards Studied</p>
               <div className="progress-bar">
@@ -203,7 +198,6 @@ function Flashcards() {
                       </div>
                     </div>
                     <div style={{ display:"flex", gap:8 }}>
-                      {/* ✅ isMore=true — won't add duplicate history entry */}
                       <button onClick={() => generateAI(true)} disabled={loading}
                         style={{ padding:"10px 20px", borderRadius:9, background:"linear-gradient(135deg,#7c3aed,#a855f7)", border:"none", color:"white", fontSize:13, fontWeight:700, cursor:"pointer", boxShadow:"0 4px 16px rgba(124,58,237,0.35)", fontFamily:"sans-serif" }}>
                         {loading ? "Generating…" : "✨ Generate More Cards"}

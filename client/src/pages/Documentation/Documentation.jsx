@@ -113,7 +113,7 @@ function Documentation() {
   const topic        = location.state?.topic        || "";
   const autoGenerate = location.state?.autoGenerate  || false;
   const fromHistory  = location.state?.fromHistory   || false;
-  const stateContent = location.state?.content       || null; // ✅ content passed from History
+  const stateContent = location.state?.content       || null;
 
   const [file,      setFile]      = useState(null);
   const [loading,   setLoading]   = useState(false);
@@ -124,22 +124,15 @@ function Documentation() {
   const [genCount,  setGenCount]  = useState(0);
   const [cachedAt,  setCachedAt]  = useState(null);
 
-  // ✅ Initialize content correctly:
-  // 1. If coming from History with content passed → use it directly
-  // 2. Else show placeholder (useEffect will load cache or auto-generate)
   const [content, setContent] = useState(() => {
     if (stateContent) return stateContent;
     return PLACEHOLDER(topic);
   });
 
-  // ✅ On mount: if stateContent was passed, mark as generated immediately
-  //             else load from localStorage cache or auto-generate
   useEffect(() => {
     if (stateContent) {
-      // Coming from History — content already set, just mark generated
       setGenerated(true);
       setGenCount(1);
-      // Try to get savedAt from cache
       const cached = loadCached(topic);
       if (cached?.savedAt) setCachedAt(cached.savedAt);
       return;
@@ -158,7 +151,6 @@ function Documentation() {
     }
   }, []);
 
-  // ── File handling ──
   const handleFile = (e) => {
     const f = e.target.files[0];
     if (!f) return;
@@ -167,7 +159,6 @@ function Documentation() {
   };
   const removeFile = () => { setFile(null); if (fileRef.current) fileRef.current.value=""; };
 
-  // ── Generate ──
   const generate = async () => {
     const topicName = topic || "General Topic";
     try {
@@ -304,12 +295,6 @@ ${markdownToHtml(content)}
               <h1 style={S.title}>📄 {topicName}</h1>
               <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
                 <p style={S.sub}>AI-Generated Documentation</p>
-                {cachedAt && (
-                  <span style={{fontSize:11,color:"#10b981",background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:100,padding:"2px 10px",fontWeight:600}}>
-                    ✅ Cached · {new Date(cachedAt).toLocaleDateString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
-                  </span>
-                )}
-                {/* ✅ Show "Viewing from History" badge when opened from History */}
                 {fromHistory && (
                   <span style={{fontSize:11,color:"#60a5fa",background:"rgba(59,130,246,0.1)",border:"1px solid rgba(59,130,246,0.25)",borderRadius:100,padding:"2px 10px",fontWeight:600}}>
                     📅 Opened from History
@@ -335,7 +320,7 @@ ${markdownToHtml(content)}
                 <button style={{...S.ghostBtn,borderRadius:"8px 0 0 8px",borderRight:"none"}} onClick={exportPDF} disabled={exporting}>📥 PDF</button>
                 <button style={{...S.ghostBtn,borderRadius:"0 8px 8px 0"}} onClick={exportTxt}>TXT</button>
               </div>
-              <button style={S.ghostBtn} onClick={addBookmark} title="Bookmark selected text">🔖</button>
+              
             </div>
           </div>
 
@@ -408,22 +393,6 @@ ${markdownToHtml(content)}
                     <p style={{fontSize:12,color:"#334155",marginTop:4}}>Generate content to see sections</p>
                   )}
                 </div>
-              </div>
-
-              <div style={S.sideCard}>
-                <h3 style={S.sideTitle}>🔖 Bookmarks</h3>
-                {bookmarks.length===0?(
-                  <p style={{fontSize:12,color:"#475569",marginTop:8}}>Select text and click 🔖 to save.</p>
-                ):(
-                  <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:10}}>
-                    {bookmarks.map((b,i)=>(
-                      <div key={i} style={S.bookmarkItem}>
-                        <span style={{fontSize:12,color:"#94a3b8",flex:1,lineHeight:1.5}}>"{b.length>60?b.slice(0,60)+"…":b}"</span>
-                        <button style={S.removeBookmark} onClick={()=>setBookmarks(p=>p.filter((_,j)=>j!==i))}>✕</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <div style={S.sideCard}>

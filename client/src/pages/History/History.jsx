@@ -330,12 +330,7 @@ export default function History() {
                             <span style={{fontSize:11,fontWeight:700,padding:"2px 9px",borderRadius:100,background:`${cfg.color}18`,color:cfg.color,border:`1px solid ${cfg.color}30`}}>
                               {cfg.label}
                             </span>
-                            {event.time&&<span style={{fontSize:11,color:"#475569"}}>🕐 {fmtTime(event.time)}</span>}
-                            {isCached && ["doc","flashcard","quiz"].includes(event.type) && (
-                              <span style={{fontSize:10,fontWeight:700,padding:"1px 7px",borderRadius:100,background:"rgba(16,185,129,0.1)",color:"#10b981",border:"1px solid rgba(16,185,129,0.25)"}}>
-                                ✅ Cached
-                              </span>
-                            )}
+                            
                           </div>
 
                           {/* Topic — main title */}

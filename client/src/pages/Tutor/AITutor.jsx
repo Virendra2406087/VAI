@@ -118,7 +118,7 @@ const clearChat = () => {
 export default function AITutor() {
   const WELCOME = {
     role:"ai",
-    content:"Hello 👋 I'm **VAI Tutor**. You can:\n\n- 💬 **Ask any question** — DSA, physics, math, code\n- 🖼️ **Upload an image** — I'll analyze it and answer\n- 📄 **Upload a file** — PDF or TXT for context\n- 📐 **Ask for diagrams** — SVG diagrams rendered visually\n- 🧮 **Request formulas** — Beautiful LaTeX math rendering",
+    content:"Hello 👋 I'm **VAI Tutor**."
   };
   const [messages, setMessages] = useState(() => {
     const cached = loadChat();
