@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import axios from "axios";
+import { API_BASE_URL } from "../../config";
 
 function Settings() {
   const [activeTab, setActiveTab] = useState("account");
@@ -37,7 +38,7 @@ function Settings() {
     if (passwords.newPass.length < 6)              { showMsg("Password must be at least 6 characters.", true); return; }
     try {
       setSaving(true);
-      await axios.put("http://localhost:5000/api/user/change-password", {
+      await axios.put(`${API_BASE_URL}/api/user/change-password`, {
         email: account.email, newPassword: passwords.newPass,
       });
       setPasswords({ current:"", newPass:"", confirm:"" });

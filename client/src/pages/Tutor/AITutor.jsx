@@ -9,6 +9,8 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { trackTutor } from "../../utils/history";
 import { triggerRateLimitToast } from "../../utils/rateLimitToast";
+import { API_BASE_URL } from "../../config";
+
 
 // ── Copy button ──
 function CopyBtn({ code }) {
@@ -190,7 +192,7 @@ export default function AITutor() {
       }
 
       const res = await axios.post(
-  "http://localhost:5000/api/tutor/ask",
+  `${API_BASE_URL}/api/tutor/ask`,
   payload,
   {
     headers: {

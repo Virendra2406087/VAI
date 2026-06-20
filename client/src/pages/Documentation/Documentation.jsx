@@ -9,7 +9,7 @@ import Navbar from "../../components/Navbar";
 import { addNotification } from "../../utils/notifications";
 import { trackDoc } from "../../utils/history";
 import { triggerRateLimitToast } from "../../utils/rateLimitToast";
-
+import { API_BASE_URL } from "../../config";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
@@ -170,7 +170,7 @@ function Documentation() {
       if (file) form.append("file", file);
 
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/docs/generate", {
+      const res = await fetch(`${API_BASE_URL}/api/docs/generate`, {
         method: "POST",
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),

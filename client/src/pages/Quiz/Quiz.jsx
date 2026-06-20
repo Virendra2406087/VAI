@@ -5,6 +5,7 @@ import { trackQuiz, saveQuizScore } from "../../utils/history";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import { triggerRateLimitToast } from "../../utils/rateLimitToast";
+import { API_BASE_URL } from "../../config";
 
 const getQuizKey = (topic) => {
   const uid = localStorage.getItem("userId") || "guest";
@@ -78,7 +79,7 @@ useEffect(() => {
   setScoreSubmitted(true);
 
   const token = localStorage.getItem("token");
-  fetch("http://localhost:5000/api/quiz/submit", {
+  fetch(`${API_BASE_URL}/api/quiz/submit`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -98,7 +99,7 @@ useEffect(() => {
     setTimeLeft(600); setScoreSubmitted(false);
 
     const token = localStorage.getItem("token");
-    const res  = await fetch("http://localhost:5000/api/quiz/generate", {
+    const res = await fetch(`${API_BASE_URL}/api/quiz/generate`, { 
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -133,7 +134,7 @@ useEffect(() => {
   try {
     setLoading(true); setError("");
     const token = localStorage.getItem("token");
-    const res  = await fetch("http://localhost:5000/api/quiz/generate", {
+    const res = await fetch(`${API_BASE_URL}/api/quiz/generate`, { 
       method: "POST",
       headers: {
         "Content-Type": "application/json",

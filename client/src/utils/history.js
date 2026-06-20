@@ -2,7 +2,9 @@
 
 import axios from "axios";
 
-const API = "http://localhost:5000/api/history";
+import { API_BASE_URL } from "../config";
+
+const API = `${API_BASE_URL}/api/history`;
 
 const authHeader = () => {
   const token = localStorage.getItem("token");

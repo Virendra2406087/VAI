@@ -4,6 +4,7 @@ import Sidebar from "../../components/Sidebar";
 import Navbar  from "../../components/Navbar";
 import axios   from "axios";
 import { getHistory, getQuizStats, getFlashStats } from "../../utils/history";
+import { API_BASE_URL } from "../../config";
 
 import {
   LineChart, Line, XAxis, YAxis, Tooltip,
@@ -208,7 +209,7 @@ function Dashboard() {
     try {
       setLoading(true); setError("");
       const token = localStorage.getItem("token");
-      const res   = await axios.get("http://localhost:5000/api/dashboard", {
+      const res = await axios.get(`${API_BASE_URL}/api/dashboard`, {
         headers: { Authorization: token ? `Bearer ${token}` : "" },
       });
       setStats(res.data);

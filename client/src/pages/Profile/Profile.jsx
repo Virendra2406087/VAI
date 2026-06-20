@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import axios from "axios";
+import { API_BASE_URL } from "../../config";
 
 function Profile() {
   const [user, setUser] = useState({
@@ -22,7 +23,7 @@ function Profile() {
     const fetchStats = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res   = await axios.get("http://localhost:5000/api/dashboard", {
+        const res = await axios.get(`${API_BASE_URL}/api/dashboard`, {
           headers: { Authorization: token ? `Bearer ${token}` : "" }
         });
         const d = res.data;

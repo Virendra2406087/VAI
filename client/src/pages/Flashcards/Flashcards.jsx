@@ -5,6 +5,8 @@ import { trackFlashcard } from "../../utils/history";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import { triggerRateLimitToast } from "../../utils/rateLimitToast";
+import { API_BASE_URL } from "../../config";
+
 
 // ── Cache helpers ──
 const getFlashKey = (topic) => {
@@ -77,7 +79,7 @@ function Flashcards() {
     setLoading(true); setError("");
 
     const token = localStorage.getItem("token");
-    const res  = await fetch("http://localhost:5000/api/flashcards/generate", {
+    const res = await fetch(`${API_BASE_URL}/api/flashcards/generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

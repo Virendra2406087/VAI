@@ -4,6 +4,7 @@ import { addNotification } from "../../utils/notifications";
 import { trackTopic } from "../../utils/history";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
+import { API_BASE_URL } from "../../config";
 
 const COLORS = ["#7c3aed","#6366f1","#a855f7","#3b82f6","#8b5cf6","#9333ea"];
 const getColor = (i) => COLORS[i % COLORS.length];
@@ -28,7 +29,7 @@ function Topics() {
   const fetchTopics = async () => {
     try {
       setLoading(true); setError("");
-      const res  = await fetch("http://localhost:5000/api/topics", { headers: getHeaders() });
+      const res = await fetch(`${API_BASE_URL}/api/topics`, { headers: getHeaders() });
       const data = await res.json();
       if (data.success) {
         setTopics((data.data || []).filter(t => t && typeof t.title === "string" && t.title.length > 0));
@@ -43,7 +44,7 @@ function Topics() {
     if (!newTitle.trim()) return;
     try {
       setCreating(true);
-      const res  = await fetch("http://localhost:5000/api/topics", {
+      const res = await fetch(`${API_BASE_URL}/api/topics`, {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ title: newTitle.trim(), description: newDesc.trim() }),
@@ -62,7 +63,7 @@ function Topics() {
   const deleteTopic = async (id) => {
     try {
       setDeleting(id);
-      await fetch(`http://localhost:5000/api/topics/${id}`, { method: "DELETE" });
+      await fetch(`${API_BASE_URL}/api/topics/${id}`, { method: "DELETE" });
       setTopics(prev => prev.filter(t => t._id !== id));
     } catch { setError("Failed to delete."); }
     finally  { setDeleting(null); }
