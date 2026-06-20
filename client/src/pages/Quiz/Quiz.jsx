@@ -4,6 +4,7 @@ import { addNotification } from "../../utils/notifications";
 import { trackQuiz, saveQuizScore } from "../../utils/history";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
+import { triggerRateLimitToast } from "../../utils/rateLimitToast";
 
 const getQuizKey = (topic) => {
   const uid = localStorage.getItem("userId") || "guest";
@@ -91,61 +92,78 @@ useEffect(() => {
 }, [submitted, answers, questions, total, scoreSubmitted, topic]); // ✅ full deps
 
   const generateQuiz = async () => {
-    try {
-      setLoading(true); setError("");
-      setSubmitted(false); setAnswers([]); setCurrent(0);
-      setTimeLeft(600); setScoreSubmitted(false);
+  try {
+    setLoading(true); setError("");
+    setSubmitted(false); setAnswers([]); setCurrent(0);
+    setTimeLeft(600); setScoreSubmitted(false);
 
-      const res  = await fetch("http://localhost:5000/api/quiz/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) { setError(data.message || "Failed to generate quiz."); return; }
+    const token = localStorage.getItem("token");
+    const res  = await fetch("http://localhost:5000/api/quiz/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ topic }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      if (res.status === 429) { setError(data.message); return; }
+      setError(data.message || "Failed to generate quiz."); return;
+    }
+    if (res.status === 429) { triggerRateLimitToast(data.message); return; }
+    if (!data.success) { setError(data.message || "Failed to generate quiz."); return; }
 
-      if (data.data && Array.isArray(data.data)) {
-        setQuestions(data.data);
-        setAnswers(Array(data.data.length).fill(null));
-        saveQuizCache(topic, data.data);
-        // ✅ Dispatch so dashboard updates cache count
-        window.dispatchEvent(new Event("quizCompleted"));
-        setCachedAt(new Date().toISOString());
-        addNotification("🧠", `${data.data.length}-question quiz generated for "${topic}"`, "quiz");
-        trackQuiz(topic, data.data.length);
-      }
-    } catch (err) {
-      console.error("Quiz error:", err);
-      setError("Could not connect to server.");
-    } finally { setLoading(false); }
-  };
+    if (data.data && Array.isArray(data.data)) {
+      setQuestions(data.data);
+      setAnswers(Array(data.data.length).fill(null));
+      saveQuizCache(topic, data.data);
+      window.dispatchEvent(new Event("quizCompleted"));
+      setCachedAt(new Date().toISOString());
+      addNotification("🧠", `${data.data.length}-question quiz generated for "${topic}"`, "quiz");
+      trackQuiz(topic, data.data.length);
+    }
+  } catch (err) {
+    console.error("Quiz error:", err);
+    setError("Could not connect to server.");
+  } finally { setLoading(false); }
+};
 
   const generateMore = async () => {
-    try {
-      setLoading(true); setError("");
-      const res  = await fetch("http://localhost:5000/api/quiz/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) { setError(data.message || "Failed."); return; }
-      if (data.data && Array.isArray(data.data)) {
-        const newQuestions = [...questions, ...data.data];
-        setQuestions(newQuestions);
-        setAnswers(prev => [...prev, ...Array(data.data.length).fill(null)]);
-        saveQuizCache(topic, newQuestions);
-        window.dispatchEvent(new Event("quizCompleted"));
-        setSubmitted(false);
-        setScoreSubmitted(false);
-        setCurrent(questions.length);
-        setTimeLeft(600);
-        addNotification("🧠", `${data.data.length} more questions added for "${topic}"`, "quiz");
-      }
-    } catch {
-      setError("Could not connect to server.");
-    } finally { setLoading(false); }
-  };
+  try {
+    setLoading(true); setError("");
+    const token = localStorage.getItem("token");
+    const res  = await fetch("http://localhost:5000/api/quiz/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ topic }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      if (res.status === 429) { setError(data.message); return; }
+      setError(data.message || "Failed."); return;
+    }
+    if (res.status === 429) { triggerRateLimitToast(data.message); return; }
+    if (!data.success) { setError(data.message || "Failed."); return; }
+    if (data.data && Array.isArray(data.data)) {
+      const newQuestions = [...questions, ...data.data];
+      setQuestions(newQuestions);
+      setAnswers(prev => [...prev, ...Array(data.data.length).fill(null)]);
+      saveQuizCache(topic, newQuestions);
+      window.dispatchEvent(new Event("quizCompleted"));
+      setSubmitted(false);
+      setScoreSubmitted(false);
+      setCurrent(questions.length);
+      setTimeLeft(600);
+      addNotification("🧠", `${data.data.length} more questions added for "${topic}"`, "quiz");
+    }
+  } catch {
+    setError("Could not connect to server.");
+  } finally { setLoading(false); }
+};
 
   const handleSubmit = () => setSubmitted(true);
 

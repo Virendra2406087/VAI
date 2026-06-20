@@ -4,6 +4,7 @@ import { addNotification } from "../../utils/notifications";
 import { trackFlashcard } from "../../utils/history";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
+import { triggerRateLimitToast } from "../../utils/rateLimitToast";
 
 // ── Cache helpers ──
 const getFlashKey = (topic) => {
@@ -72,39 +73,46 @@ function Flashcards() {
 
 
   const generateAI = async (isMore = false) => {
-    try {
-      setLoading(true); setError("");
+  try {
+    setLoading(true); setError("");
 
-      const res  = await fetch("http://localhost:5000/api/flashcards/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic }),
+    const token = localStorage.getItem("token");
+    const res  = await fetch("http://localhost:5000/api/flashcards/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ topic }),
+    });
+    const data = await res.json();
+    if (res.status === 429) { triggerRateLimitToast(data.message); return; }
+    if (!res.ok) {
+      if (res.status === 429) { setError(data.message); return; }
+      setError(data.message || "AI failed. Try again."); return;
+    }
+    if (!data.success) { setError(data.message || "AI failed. Try again."); return; }
+
+    if (data.data && Array.isArray(data.data)) {
+      setCards(prev => {
+        const updated = [...prev, ...data.data];
+        saveFlashCache(topic, updated);
+        window.dispatchEvent(new Event("flashcardGenerated"));
+        setCachedAt(new Date().toISOString());
+        return updated;
       });
-      const data = await res.json();
+      addNotification("🃏", `${data.data.length} flashcards generated for "${topic}"`, "flashcard");
 
-      if (!res.ok || !data.success) { setError(data.message || "AI failed. Try again."); return; }
-
-      if (data.data && Array.isArray(data.data)) {
-        setCards(prev => {
-          const updated = [...prev, ...data.data];
-          saveFlashCache(topic, updated);
-          window.dispatchEvent(new Event("flashcardGenerated"));
-          setCachedAt(new Date().toISOString());
-          return updated;
-        });
-        addNotification("🃏", `${data.data.length} flashcards generated for "${topic}"`, "flashcard");
-
-
-        if (!isMore) {
-          trackFlashcard(topic, data.data.length);
-        }
-        setIndex(0);
+      if (!isMore) {
+        trackFlashcard(topic, data.data.length);
       }
-    } catch (err) {
-      console.error("AI error:", err);
-      setError("Could not connect to server.");
-    } finally { setLoading(false); }
-  };
+      setIndex(0);
+    }
+  } catch (err) {
+    console.error("AI error:", err);
+    setError("Could not connect to server.");
+  } finally { setLoading(false); }
+};
 
   const markDifficulty = (level) => {
     if (level === "easy")   setEasy(p => p + 1);

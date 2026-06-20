@@ -1,4 +1,3 @@
-// server/routes/quizRoutes.js
 const express = require("express");
 const router  = express.Router();
 const {
@@ -8,11 +7,12 @@ const {
   deleteQuiz,
   submitQuizResult,
 } = require("../Controllers/quizController");
+const { protect } = require("../middleware/authMiddleware");
+const aiRateLimiter = require("../middleware/aiRateLimit");
 
-// ⚠️ specific routes BEFORE /:id
-router.post("/generate",       generateQuiz);
+router.post("/generate",       protect, aiRateLimiter, generateQuiz);
 router.post("/submit",         submitQuizResult);
-router.get("/topic/:topic",    getQuizByTopic);   // GET /api/quiz/topic/Binary+Search
+router.get("/topic/:topic",    getQuizByTopic);
 router.get("/",                getQuizzes);
 router.delete("/:id",          deleteQuiz);
 

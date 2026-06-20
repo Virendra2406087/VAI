@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import RateLimitToast from "./RateLimitToast";
 import {
   getNotifications,
   markAllRead,
@@ -7,6 +8,8 @@ import {
   clearNotifications,
   timeAgo,
 } from "../utils/notifications";
+
+
 
 const PAGE_TITLES = {
   "/dashboard":       { title: "Dashboard",     icon: "📊" },
@@ -40,6 +43,7 @@ function Navbar() {
     .slice(0, 2);
 
   const [search,      setSearch]      = useState("");
+  const [rateLimitMsg, setRateLimitMsg] = useState("");
   const [showNotifs,  setShowNotifs]  = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [notifs,      setNotifs]      = useState([]);
@@ -65,6 +69,13 @@ useEffect(() => {
   // ✅ THIS LINE WAS MISSING — tells Sidebar & all pages to update
   window.dispatchEvent(new CustomEvent("themeChanged", { detail: { theme } }));
 }, [theme]);
+
+  /*--- Rate Limit----         */
+  useEffect(() => {
+  const handler = (e) => setRateLimitMsg(e.detail.message);
+  window.addEventListener("rateLimitHit", handler);
+  return () => window.removeEventListener("rateLimitHit", handler);
+}, []);
 
   /* ── Notifications ── */
   useEffect(() => {
@@ -703,6 +714,11 @@ useEffect(() => {
         </div>
 
       </div>
+
+      <RateLimitToast
+        message={rateLimitMsg}
+        onClose={() => setRateLimitMsg("")}
+      />
     </div>
   );
 }

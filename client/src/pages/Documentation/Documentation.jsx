@@ -8,6 +8,7 @@ import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import { addNotification } from "../../utils/notifications";
 import { trackDoc } from "../../utils/history";
+import { triggerRateLimitToast } from "../../utils/rateLimitToast";
 
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -159,6 +160,7 @@ function Documentation() {
   };
   const removeFile = () => { setFile(null); if (fileRef.current) fileRef.current.value=""; };
 
+  // ✅ Updated: sends Authorization token + handles 429 rate-limit responses
   const generate = async () => {
     const topicName = topic || "General Topic";
     try {
@@ -167,10 +169,22 @@ function Documentation() {
       form.append("topic", topicName);
       if (file) form.append("file", file);
 
-      const res  = await fetch("http://localhost:5000/api/docs/generate", { method:"POST", body:form });
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:5000/api/docs/generate", {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          // ❌ do NOT set Content-Type here — fetch sets the multipart boundary automatically for FormData
+        },
+        body: form,
+      });
       const data = await res.json();
-
-      if (!res.ok || !data.success) { setError(data.message || "Generation failed."); return; }
+      if (res.status === 429) { triggerRateLimitToast(data.message); return; }
+      if (!res.ok) {
+        if (res.status === 429) { setError(data.message); return; }
+        setError(data.message || "Generation failed."); return;
+      }
+      if (!data.success) { setError(data.message || "Generation failed."); return; }
 
       const newContent = genCount > 0 ? content + "\n\n---\n\n" + data.content : data.content;
       setContent(newContent);

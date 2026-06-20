@@ -8,6 +8,7 @@ import rehypeKatex   from "rehype-katex";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { trackTutor } from "../../utils/history";
+import { triggerRateLimitToast } from "../../utils/rateLimitToast";
 
 // ── Copy button ──
 function CopyBtn({ code }) {
@@ -188,7 +189,15 @@ export default function AITutor() {
         }));
       }
 
-      const res = await axios.post("http://localhost:5000/api/tutor/ask", payload);
+      const res = await axios.post(
+  "http://localhost:5000/api/tutor/ask",
+  payload,
+  {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  }
+);
       const answer = res.data.answer;
       setMessages(p => {
         const updated = [...p, { role:"ai", content:answer }];
@@ -198,12 +207,14 @@ export default function AITutor() {
       if (q) trackTutor(q, answer);
 
     } catch(err) {
-      const msg = err.response?.status===429
-        ? "⚠️ AI quota exceeded. Please try again."
-        : "❌ Could not reach server.";
-      setError(msg);
-      setMessages(p => [...p, { role:"ai", content:msg }]);
-    } finally { setTyping(false); }
+  if (err.response?.status === 429) {
+    triggerRateLimitToast(err.response.data.message);
+    return;
+  }
+  const msg = "❌ Could not reach server.";
+  setError(msg);
+  setMessages(p => [...p, { role:"ai", content:msg }]);
+} finally { setTyping(false); }
   };
 
   const onKey = (e) => { if (e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();} };

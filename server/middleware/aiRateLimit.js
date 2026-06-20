@@ -1,8 +1,8 @@
-// server/middleware/rateLimit.js
+// server/middleware/aiRateLimit.js
 const User = require("../models/User");
 
-const MAX_REQUESTS = 20;          // change to whatever limit you want
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes — change as needed
+const MAX_REQUESTS = 20;
+const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
 const aiRateLimiter = async (req, res, next) => {
   try {
@@ -19,7 +19,6 @@ const aiRateLimiter = async (req, res, next) => {
     const now = Date.now();
     const windowStart = new Date(user.aiWindowStart).getTime();
 
-    // Window expired -> reset counter
     if (now - windowStart > WINDOW_MS) {
       user.aiRequestCount = 1;
       user.aiWindowStart = now;
@@ -27,22 +26,20 @@ const aiRateLimiter = async (req, res, next) => {
       return next();
     }
 
-    // Limit reached
     if (user.aiRequestCount >= MAX_REQUESTS) {
       const retryAfterMs = WINDOW_MS - (now - windowStart);
       const retryAfterMin = Math.ceil(retryAfterMs / 60000);
       return res.status(429).json({
-        error: `You've reached your AI usage limit. Try again in ${retryAfterMin} minute(s).`,
+        message: `You've reached your AI usage limit. Try again in ${retryAfterMin} minute(s).`,
         retryAfterSeconds: Math.ceil(retryAfterMs / 1000),
       });
     }
 
-    // Under limit -> increment and continue
     user.aiRequestCount += 1;
     await user.save();
     next();
   } catch (err) {
-    console.error("Rate limiter error:", err);
+    console.error("AI rate limiter error:", err);
     next(err);
   }
 };

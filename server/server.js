@@ -9,7 +9,6 @@ const mongoose = require("mongoose");
 const logger     = require("./utils/logger");
 const passport   = require("./config/passport");
 const session    = require("express-session");
-const apiLimiter = require("./middleware/rateLimit");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const { initSocket } = require("./socket/socketServer");
 
@@ -41,7 +40,6 @@ app.use(passport.session());
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(morgan("dev"));
-app.use("/api", apiLimiter);
 
 // ── API Routes ──
 app.use("/api/auth",       authRoutes);

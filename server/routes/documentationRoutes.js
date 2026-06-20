@@ -1,4 +1,3 @@
-// server/routes/documentationRoutes.js
 const express  = require("express");
 const router   = express.Router();
 const multer   = require("multer");
@@ -9,6 +8,8 @@ const {
   getDocumentationById,
   getDocumentationByTopic,
 } = require("../Controllers/documentationController");
+const { protect } = require("../middleware/authMiddleware");
+const aiRateLimiter = require("../middleware/aiRateLimit");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
@@ -16,10 +17,15 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ⚠️ specific routes BEFORE /:id
-router.get("/topic/:topic", getDocumentationByTopic);  // GET /api/docs/topic/Binary+Search
-router.get("/:id",          getDocumentationById);     // GET /api/docs/64abc123...
-router.get("/",             getDocumentation);         // GET /api/docs
-router.post("/generate",    upload.single("file"), generateDocumentation);
+router.get("/topic/:topic", getDocumentationByTopic);
+router.get("/:id",          getDocumentationById);
+router.get("/",             getDocumentation);
+router.post(
+  "/generate",
+  protect,
+  aiRateLimiter,
+  upload.single("file"),
+  generateDocumentation
+);
 
 module.exports = router;

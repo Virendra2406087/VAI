@@ -5052,3 +5052,6 @@ pre {
 
 [data-theme="light"] .settings-card-title { color: #1e1b4b !important; }
 [data-theme="light"] .profile-card-title  { color: #1e1b4b !important; }
+
+@keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }

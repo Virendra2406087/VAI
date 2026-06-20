@@ -213,9 +213,18 @@ function Dashboard() {
       });
       setStats(res.data);
     } catch (err) {
-      console.error(err);
-      setError("Failed to load dashboard.");
-    } finally { setLoading(false); }
+  console.error("Dashboard fetch error:", err.response?.status, err.response?.data || err.message);
+
+  if (!err.response) {
+    setError("Cannot reach server. Is the backend running?");
+  } else if (err.response.status === 401) {
+    setError("Session expired. Please log in again.");
+  } else if (err.response.status === 404) {
+    setError("Dashboard endpoint not found.");
+  } else {
+    setError("Failed to load dashboard.");
+  }
+} finally { setLoading(false); }
   }, []);
 
   useEffect(() => {

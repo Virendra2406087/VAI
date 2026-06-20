@@ -2,7 +2,7 @@
 const Documentation = require("../models/Documentation");
 const fs            = require("fs");
 const { generateWithGemini } = require("../config/aiConfig");
-const { saveEvent } = require("./historyController");
+const { saveEvent } = require("./HistoryController");
 const jwt           = require("jsonwebtoken");
 
 let pdfParse;
