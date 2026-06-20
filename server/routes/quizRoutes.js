@@ -7,7 +7,7 @@ const {
   getQuizByTopic,
   deleteQuiz,
   submitQuizResult,
-} = require("../controllers/quizController");
+} = require("../Controllers/quizController");
 
 // ⚠️ specific routes BEFORE /:id
 router.post("/generate",       generateQuiz);

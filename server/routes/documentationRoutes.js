@@ -8,7 +8,7 @@ const {
   getDocumentation,
   getDocumentationById,
   getDocumentationByTopic,
-} = require("../controllers/documentationController");
+} = require("../Controllers/documentationController");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),

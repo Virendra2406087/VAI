@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const tutorController = require("../controllers/tutorController");
+const tutorController = require("../Controllers/tutorController");
 
 // ✅ SAFE way (no undefined error)
 router.post("/ask", tutorController.askTutor);

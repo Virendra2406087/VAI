@@ -1,7 +1,7 @@
 // server/routes/plannerRoutes.js
 const express = require("express");
 const router  = express.Router();
-const { createPlanner, getPlanner, updatePlanner, deletePlanner } = require("../controllers/plannerController");
+const { createPlanner, getPlanner, updatePlanner, deletePlanner } = require("../Controllers/plannerController");
 
 router.post("/",     createPlanner);
 router.get("/",      getPlanner);

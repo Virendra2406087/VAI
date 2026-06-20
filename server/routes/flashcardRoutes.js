@@ -7,7 +7,7 @@ const {
   getFlashcardsByTopic,
   deleteFlashcard,
   generateFlashcards,
-} = require("../controllers/flashcardController");
+} = require("../Controllers/flashcardController");
 
 // ⚠️ specific routes BEFORE /:id
 router.post("/generate",       generateFlashcards);
