@@ -1,7 +1,7 @@
 // server/controllers/flashcardController.js
 const Flashcard  = require("../models/Flashcard");
 const { generateWithGemini } = require("../config/aiConfig");
-const { saveEvent } = require("./historyController");
+const { saveEvent } = require("./HistoryController");
 const jwt         = require("jsonwebtoken");
 
 const getUserId = (req) => {

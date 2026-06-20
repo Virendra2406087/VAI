@@ -1,6 +1,6 @@
 // server/controllers/tutorController.js
 const { GoogleGenAI } = require("@google/genai");
-const { saveEvent }   = require("./historyController");
+const { saveEvent }   = require("./HistoryController");
 const jwt             = require("jsonwebtoken");
 
 if (!process.env.GEMINI_API_KEY) {

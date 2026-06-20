@@ -1,7 +1,7 @@
 // server/controllers/quizController.js
 const Quiz         = require("../models/Quiz");
 const { generateWithGemini } = require("../config/aiConfig");
-const { saveEvent } = require("./historyController");
+const { saveEvent } = require("./HistoryController");
 const jwt           = require("jsonwebtoken");
 
 const getUserId = (req) => {
