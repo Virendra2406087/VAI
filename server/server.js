@@ -33,7 +33,7 @@ mongoose
   .catch(err => console.error("❌ MongoDB error:", err));
 
 // ── Middleware ──
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173", credentials: true }));
 app.use(session({ secret: process.env.JWT_SECRET, resave: false, saveUninitialized: false }));
 app.use(passport.initialize());
 app.use(passport.session());
