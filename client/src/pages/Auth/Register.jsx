@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { registerUser } from "../../services/authService";
 import { FcGoogle } from "react-icons/fc";
+import { API_BASE_URL } from "../../config";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -81,8 +82,8 @@ export default function Register() {
 
         <div style={S.divider}><span style={S.dividerText}>OR</span></div>
 
-        <button style={S.googleBtn} onClick={() => window.open("http://localhost:5000/api/auth/google","_self")}>
-          <FcGoogle size={18} /> Continue with Google
+        <button style={S.googleBtn} onClick={() => window.open(`${API_BASE_URL}/api/auth/google`,"_self")}>
+        <FcGoogle size={18} /> Continue with Google
         </button>
 
         <p style={S.switchText}>
