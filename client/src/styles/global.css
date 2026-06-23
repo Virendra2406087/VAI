@@ -1825,31 +1825,6 @@ pre {
 ::-webkit-scrollbar-thumb:hover { background: rgba(124, 58, 237, 0.5); }
 
 /* ============================================
-   RESPONSIVE
-============================================ */
-
-@media (max-width: 1024px) {
-  .stats-grid        { grid-template-columns: repeat(2, 1fr); }
-  .topics-grid       { grid-template-columns: repeat(2, 1fr); }
-  .ai-section        { grid-template-columns: repeat(2, 1fr); }
-  .documentation-container { grid-template-columns: 1fr; }
-  .quiz-container    { grid-template-columns: 1fr; }
-  .flashcards-container { grid-template-columns: 1fr; }
-  .charts-grid       { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 768px) {
-  .sidebar           { width: 200px; }
-  .stats-grid        { grid-template-columns: 1fr 1fr; }
-  .topics-grid       { grid-template-columns: 1fr; }
-  .ai-section        { grid-template-columns: 1fr; }
-  .middle-grid       { grid-template-columns: 1fr; }
-  .bottom-grid       { grid-template-columns: 1fr 1fr; }
-  .planner-top       { grid-template-columns: 1fr; }
-  .planner-bottom    { grid-template-columns: 1fr; }
-}
-
-/* ============================================
    TOPICS PAGE
 ============================================ */
 
@@ -4289,28 +4264,164 @@ pre {
 }
 
 /* ============================================
-   RESPONSIVE
+   MOBILE MENU BUTTON (hidden by default — shown ≤768px below)
 ============================================ */
 
-@media (max-width: 1100px) {
+.mobile-menu-btn {
+  display: none;
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+/* ============================================
+   RESPONSIVE
+   Breakpoint map:
+   ≥1280px      → Desktop (default styles)
+   1024–1279px  → Small laptop / large tablet landscape
+   768–1023px   → Tablet
+   481–767px    → Large phone / small tablet
+   ≤480px       → Phone
+   ≤360px       → Very small phone
+============================================ */
+
+/* ---------- 1024px — Laptop / tablet landscape ---------- */
+@media (max-width: 1024px) {
+  .stats-grid            { grid-template-columns: repeat(2, 1fr); }
+  .topics-grid           { grid-template-columns: repeat(2, 1fr); }
+  .ai-section            { grid-template-columns: repeat(2, 1fr); }
+  .documentation-container { grid-template-columns: 1fr; }
+  .quiz-container        { grid-template-columns: 1fr; }
+  .flashcards-container  { grid-template-columns: 1fr; }
+  .charts-grid           { grid-template-columns: 1fr; }
   .upload-layout         { grid-template-columns: 1fr; }
   .profile-layout        { grid-template-columns: 1fr; }
   .settings-layout       { grid-template-columns: 1fr; }
   .planner-main          { grid-template-columns: 1fr; }
   .planner-stats-row     { grid-template-columns: repeat(2, 1fr); }
+  .middle-grid           { grid-template-columns: repeat(2, 1fr); }
+  .bottom-grid           { grid-template-columns: repeat(2, 1fr); }
+  .topics-grid-wrap      { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+
+  .navbar-search-wrap { max-width: 260px; }
 }
 
+/* ---------- 768px — Tablet ---------- */
 @media (max-width: 768px) {
-  .topics-grid-wrap      { grid-template-columns: 1fr; }
+  /* Sidebar becomes an off-canvas drawer — toggled via JS adding "open" class */
+  .sidebar,
+  .sidebar-new {
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 240px !important;
+    z-index: 200;
+  }
+  .sidebar.open,
+  .sidebar-new.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 150;
+    display: none;
+  }
+  .sidebar-backdrop.show { display: block; }
+
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+
+  .stats-grid            { grid-template-columns: 1fr 1fr; }
+  .topics-grid           { grid-template-columns: 1fr; }
+  .ai-section            { grid-template-columns: 1fr; }
+  .middle-grid           { grid-template-columns: 1fr; }
+  .bottom-grid           { grid-template-columns: 1fr 1fr; }
+  .planner-top           { grid-template-columns: 1fr; }
+  .planner-bottom        { grid-template-columns: 1fr; }
+  .planner-stats-row     { grid-template-columns: 1fr 1fr; }
+  .achievements-grid     { grid-template-columns: repeat(2, 1fr); }
   .settings-fields       { grid-template-columns: 1fr; }
   .profile-fields        { grid-template-columns: 1fr; }
-  .achievements-grid     { grid-template-columns: repeat(2, 1fr); }
-  .planner-stats-row     { grid-template-columns: 1fr 1fr; }
   .quick-topics-grid     { grid-template-columns: 1fr; }
-  .upload-page           { padding: 16px; }
-  .topics-page           { padding: 16px; }
-  .dashboard-page        { padding: 16px; }
+  .topics-grid-wrap      { grid-template-columns: 1fr; }
+
+  .upload-page, .topics-page, .dashboard-page,
+  .profile-page, .profile-container, .settings-page,
+  .settings-page-new, .planner-page,
+  .documentation-container, .quiz-container,
+  .flashcards-container {
+    padding: 16px !important;
+  }
+
+  .navbar, .navbar-new { padding: 0 14px; gap: 8px; }
+  .navbar-search-wrap { display: none; }
+  .navbar-page-title { min-width: 0; }
+
+  .topics-page-title, .upload-title, .dashboard-greeting-title,
+  .profile-page-title { font-size: 22px !important; }
+
+  .flashcard-viewer { height: 200px; }
+
+  .chat-bubble, .tutor-bubble { max-width: 88%; }
+
+  .modal-box { max-width: 92vw; padding: 20px; }
+
+  .auth-card, .auth-card-new { padding: 28px 22px; max-width: 92vw; }
 }
+
+/* ---------- 480px — Phone ---------- */
+@media (max-width: 480px) {
+  .stats-grid, .bottom-grid, .planner-stats-row,
+  .achievements-grid, .navigator-grid { grid-template-columns: 1fr 1fr; }
+
+  .quiz-options { gap: 8px; }
+  .quiz-nav-buttons { flex-direction: column; }
+  .quiz-nav-buttons button { width: 100%; }
+
+  .difficulty-buttons { flex-direction: column; }
+  .flash-nav { flex-wrap: wrap; gap: 10px; }
+
+  .doc-actions, .flashcard-actions, .topic-actions-row {
+    flex-direction: column;
+    width: 100%;
+  }
+  .doc-actions button, .flashcard-actions button,
+  .topic-action-btn, .topic-ghost-btn { width: 100%; }
+
+  .stat-card-value, .planner-stat-value { font-size: 24px !important; }
+  .topics-page-title, .upload-title, .dashboard-greeting-title,
+  .profile-page-title { font-size: 19px !important; }
+
+  .ai-input-area, .tutor-input-area { gap: 6px; }
+  .ai-input-area textarea, .tutor-textarea { font-size: 13px; padding: 10px 12px; }
+
+  .profile-left-card, .profile-right-card { padding: 18px; }
+  .profile-avatar-img, .profile-avatar-initials { width: 76px; height: 76px; }
+
+  .navbar-page-date { display: none; }
+
+  .flashcard-front h2, .flashcard-back h2 { font-size: 16px; }
+
+  .form-input, .form-textarea, .auth-input { padding: 10px 12px; font-size: 13px; }
+
+  .modal-box { padding: 18px; }
+  .auth-card, .auth-card-new { padding: 24px 18px; }
+}
+
+/* ---------- Very small phones (≤360px) ---------- */
+@media (max-width: 360px) {
+  .stats-grid, .bottom-grid, .planner-stats-row,
+  .achievements-grid { grid-template-columns: 1fr; }
+  .count-selector { flex-wrap: wrap; }
+}
+
 /* ============================================
    LIGHT MODE — FIXED VISIBILITY + FROSTED GLASS
 ============================================ */
