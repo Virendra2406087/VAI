@@ -1,4 +1,3 @@
-// server/routes/authRoutes.js
 const express  = require("express");
 const router   = express.Router();
 const passport = require("passport");
@@ -24,23 +23,24 @@ router.get("/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-// ── Google Callback — manual authenticate for better error handling ──
+// ── Google Callback ──
 router.get("/google/callback", (req, res, next) => {
   passport.authenticate("google", { session: false }, (err, user, info) => {
-    // ✅ Log everything so we can see what's failing
+
+    const CLIENT = process.env.CLIENT_URL || "http://localhost:5173";
+
     if (err) {
       console.error("❌ Google OAuth error:", err);
-      return res.redirect("http://localhost:5173/login?error=google_failed");
+      return res.redirect(`${CLIENT}/login?error=google_failed`);
     }
 
     if (!user) {
       console.error("❌ Google OAuth no user — info:", info);
-      return res.redirect("http://localhost:5173/login?error=google_failed");
+      return res.redirect(`${CLIENT}/login?error=google_failed`);
     }
 
     console.log("✅ Google OAuth success — user:", user.email);
 
-    // Generate JWT
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
@@ -52,7 +52,7 @@ router.get("/google/callback", (req, res, next) => {
     const id    = encodeURIComponent(user._id.toString());
 
     return res.redirect(
-      `http://localhost:5173/auth/google/success?token=${token}&name=${name}&email=${email}&id=${id}`
+      `${CLIENT}/auth/google/success?token=${token}&name=${name}&email=${email}&id=${id}`
     );
   })(req, res, next);
 });

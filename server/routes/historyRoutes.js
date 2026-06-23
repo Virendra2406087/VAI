@@ -1,4 +1,3 @@
-// server/routes/historyRoutes.js
 const express = require("express");
 const router  = express.Router();
 const { getHistory, addHistoryEvent } = require("../Controllers/HistoryController");

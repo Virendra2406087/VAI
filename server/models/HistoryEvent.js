@@ -1,4 +1,3 @@
-// server/models/HistoryEvent.js
 const mongoose = require("mongoose");
 
 const historyEventSchema = new mongoose.Schema(
@@ -22,12 +21,10 @@ const historyEventSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    // Store the resource _id so we can navigate to it
     resourceId: {
       type: String,
       default: "",
     },
-    // For quizzes: score, total
     meta: {
       type: mongoose.Schema.Types.Mixed,
       default: {},
@@ -36,7 +33,6 @@ const historyEventSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index for fast day-by-day queries
 historyEventSchema.index({ userId: 1, createdAt: -1 });
 
 module.exports = mongoose.model("HistoryEvent", historyEventSchema);

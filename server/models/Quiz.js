@@ -1,4 +1,3 @@
-// server/models/Quiz.js
 const mongoose = require("mongoose");
 
 const quizSchema = new mongoose.Schema(
@@ -17,11 +16,9 @@ const quizSchema = new mongoose.Schema(
     options:  [{ type: String }],
     correctAnswer: { type: String, default: "" },
     explanation:   { type: String, default: "" },
-
-    // ✅ Result fields — only set on result entries
     score:    { type: Number, default: null },
     total:    { type: Number, default: null },
-    isResult: { type: Boolean, default: false }, // true = result entry, false = question
+    isResult: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

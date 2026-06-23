@@ -1,4 +1,3 @@
-// server/controllers/tutorController.js
 const { GoogleGenAI } = require("@google/genai");
 const { saveEvent }   = require("./HistoryController");
 const jwt             = require("jsonwebtoken");

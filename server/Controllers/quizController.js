@@ -1,4 +1,3 @@
-// server/controllers/quizController.js
 const Quiz         = require("../models/Quiz");
 const { generateWithGemini } = require("../config/aiConfig");
 const { saveEvent } = require("./HistoryController");
@@ -43,7 +42,6 @@ Rules:
       return res.status(500).json({ success: false, message: "AI returned invalid JSON. Try again." });
     }
 
-    // ✅ Save userId with every quiz question
     const userId = getUserId(req);
     const saved = await Quiz.insertMany(
       questions.map((q) => ({
@@ -52,7 +50,7 @@ Rules:
         correctAnswer: q.correctAnswer,
         explanation:   q.explanation || "",
         topic,
-        userId: userId || null, // ✅ attach userId
+        userId: userId || null,
       }))
     );
 
@@ -106,13 +104,11 @@ exports.deleteQuiz = async (req, res) => {
   }
 };
 
-// ✅ Called when user submits a quiz — saves score for real accuracy calculation
 exports.submitQuizResult = async (req, res) => {
   try {
     const { topic, score, total } = req.body;
     const userId = getUserId(req);
 
-    // ✅ Update the quiz questions for this topic with the score
     if (userId && score !== undefined && total !== undefined) {
       await Quiz.updateMany(
         { topic: { $regex: topic, $options: "i" }, userId },

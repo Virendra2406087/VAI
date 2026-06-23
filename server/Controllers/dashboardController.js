@@ -1,4 +1,3 @@
-// server/controllers/dashboardController.js
 const Topic         = require("../models/Topic");
 const Flashcard     = require("../models/Flashcard");
 const Quiz          = require("../models/Quiz");

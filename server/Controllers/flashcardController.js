@@ -1,4 +1,3 @@
-// server/controllers/flashcardController.js
 const Flashcard  = require("../models/Flashcard");
 const { generateWithGemini } = require("../config/aiConfig");
 const { saveEvent } = require("./HistoryController");
@@ -79,7 +78,6 @@ Return ONLY a valid JSON array with no extra text, no markdown, no code fences:
       return res.status(500).json({ success: false, message: "AI returned invalid JSON. Try again." });
     }
 
-    // ✅ Save userId with every flashcard
     const userId = getUserId(req);
     const saved = await Flashcard.insertMany(
       cards.map((c) => ({
@@ -87,7 +85,7 @@ Return ONLY a valid JSON array with no extra text, no markdown, no code fences:
         answer:     c.answer,
         difficulty: c.difficulty || "medium",
         topic,
-        userId: userId || null, // ✅ attach userId
+        userId: userId || null,
       }))
     );
 

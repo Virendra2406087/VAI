@@ -1,8 +1,6 @@
-// server/controllers/topicController.js
 const Topic = require("../models/Topic");
 const jwt   = require("jsonwebtoken");
 
-// Helper — extract userId from token
 const getUserId = (req) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];

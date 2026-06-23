@@ -1,4 +1,3 @@
-// server/controllers/documentationController.js
 const Documentation = require("../models/Documentation");
 const fs            = require("fs");
 const { generateWithGemini } = require("../config/aiConfig");
@@ -101,7 +100,6 @@ exports.getDocumentation = async (req, res) => {
   }
 };
 
-// GET /api/docs/:id
 exports.getDocumentationById = async (req, res) => {
   try {
     const doc = await Documentation.findById(req.params.id);
@@ -112,7 +110,6 @@ exports.getDocumentationById = async (req, res) => {
   }
 };
 
-// GET /api/docs/topic/:topic  — latest doc matching topic name
 exports.getDocumentationByTopic = async (req, res) => {
   try {
     const topic = decodeURIComponent(req.params.topic);

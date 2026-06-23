@@ -1,4 +1,3 @@
-// server/config/passport.js
 const passport       = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User           = require("../models/User");
@@ -12,16 +11,10 @@ passport.use(new GoogleStrategy({
     const email  = profile.emails[0].value;
     const avatar = profile.photos?.[0]?.value || "";
 
-    // ✅ Find existing user by googleId first, then by email
     let user = await User.findOne({ googleId: profile.id });
-
-    if (!user) {
-      user = await User.findOne({ email });
-    }
+    if (!user) user = await User.findOne({ email });
 
     if (user) {
-      // ✅ Returning user — update googleId and avatar directly in DB
-      // Use updateOne to avoid triggering the pre-save hook
       await User.updateOne(
         { _id: user._id },
         {
@@ -34,16 +27,14 @@ passport.use(new GoogleStrategy({
       return done(null, user);
     }
 
-    // ✅ New user — create with a pre-hashed dummy password
-    // Using updateOne with upsert avoids the pre-save hook entirely for google users
-    const bcrypt  = require("bcryptjs");
-    const salt    = await bcrypt.genSalt(10);
-    const hashed  = await bcrypt.hash(`google_${profile.id}_${Date.now()}`, salt);
+    const bcrypt = require("bcryptjs");
+    const salt   = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(`google_${profile.id}_${Date.now()}`, salt);
 
     user = await User.create({
       name:     profile.displayName,
       email,
-      password: hashed,   // already hashed — pre-save hook will skip it
+      password: hashed,
       avatar,
       googleId: profile.id,
       provider: "google",
@@ -56,14 +47,15 @@ passport.use(new GoogleStrategy({
   }
 }));
 
-passport.serializeUser((user, done)        => done(null, user.id));
-passport.deserializeUser(async (id, done)  => {
+passport.serializeUser((user, done) => done(null, user.id));
+
+passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id);
     done(null, user);
   } catch (err) {
     done(err, null);
   }
-}));
+});
 
 module.exports = passport;

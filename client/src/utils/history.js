@@ -1,5 +1,3 @@
-// client/src/utils/history.js
-
 import axios from "axios";
 
 import { API_BASE_URL } from "../config";

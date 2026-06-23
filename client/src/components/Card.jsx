@@ -1,4 +1,3 @@
-// client/src/components/Card.jsx
 import React from "react";
 
 function Card({ title, value, icon, color = "#7c3aed", sub }) {

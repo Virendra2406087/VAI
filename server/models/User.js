@@ -18,11 +18,9 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ Pre-save: only hash if password was modified AND not already hashed
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
 
-  // Already a bcrypt hash — skip (starts with $2a$ or $2b$)
   if (this.password.startsWith("$2")) return;
 
   const salt = await bcrypt.genSalt(10);

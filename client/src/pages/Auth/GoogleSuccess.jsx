@@ -1,4 +1,3 @@
-// client/src/pages/Auth/GoogleSuccess.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -7,7 +6,6 @@ export default function GoogleSuccess() {
   const [status, setStatus] = useState("Signing you in with Google…");
 
   useEffect(() => {
-    // ✅ Try both window.location.search and hash
     const search = window.location.search || window.location.hash.replace("#","?");
     const params = new URLSearchParams(search);
 
@@ -21,7 +19,6 @@ export default function GoogleSuccess() {
     if (token) {
       const incomingId = id || "";
 
-      // Only clear if a DIFFERENT user
       const existingId = localStorage.getItem("userId");
       if (existingId && existingId !== incomingId) {
         localStorage.clear();

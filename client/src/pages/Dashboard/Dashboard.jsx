@@ -73,9 +73,7 @@ const getLastActiveTopic = () => {
   const found = all.find(e => e.type === "flashcard" || e.type === "quiz");
   if (!found) return null;
 
-  // ✅ Use stored topic field, or parse from title as fallback
   if (found.topic) return found.topic;
-  // Parse "🃏 Flashcards: Calculus" → "Calculus"
   const match = found.title?.match(/(?:Flashcards|Quiz):\s*(.+)/);
   return match?.[1]?.trim() || null;
 };
@@ -86,16 +84,13 @@ const getTopicsFromHistory = () => {
   const seen    = new Set();
   const topics  = [];
 
-  // Sort newest first using time field
   const sorted = [...all].sort((a, b) =>
     new Date(b.time || 0) - new Date(a.time || 0)
   );
 
   sorted.forEach(e => {
-    // ✅ Use stored topic field first
     let topic = e.topic;
 
-    // Fallback: parse from title for old entries
     if (!topic && e.title) {
       const match = e.title.match(/(?:Flashcards|Quiz|Documentation|Topic|Task):\s*(.+)/);
       if (match) topic = match[1].trim();
@@ -146,14 +141,12 @@ function Dashboard() {
   const [flashcardCount, setFlashcardCount] = useState(0);
   const [quizCount,      setQuizCount]      = useState(0);
 
-  // ✅ Local quiz accuracy + flashcard deck stats
   const [quizAccuracy,   setQuizAccuracy]   = useState(0);
   const [totalQuizzes,   setTotalQuizzes]   = useState(0);
   const [flashdeckCount, setFlashdeckCount] = useState(0);
 
   const isDark = theme === "dark";
 
-  /* ── Theme listener ── */
   useEffect(() => {
     const handler = e => setTheme(e.detail.theme);
     window.addEventListener("themeChanged", handler);
@@ -165,7 +158,6 @@ function Dashboard() {
     return () => { window.removeEventListener("themeChanged", handler); observer.disconnect(); };
   }, []);
 
-  /* ── Recompute all local data ── */
   const recomputeLocal = useCallback(() => {
     setStreak(computeStreak());
     setWeeklyActivity(computeWeeklyActivity());
@@ -185,12 +177,10 @@ function Dashboard() {
       setQuizCount(0);
     }
 
-    // ✅ Read quiz accuracy from localStorage (saved by saveQuizScore)
     const qStats = getQuizStats();
     setQuizAccuracy(qStats.accuracy    || 0);
     setTotalQuizzes(qStats.totalQuizzes || 0);
 
-    // ✅ Read flashcard deck count from localStorage (saved by trackFlashcard)
     const fStats = getFlashStats();
     setFlashdeckCount(fStats.totalDecks || 0);
 
@@ -327,7 +317,6 @@ function Dashboard() {
   const activeQuizCount  = quizCount;
   const totalWeekActivity = weeklyActivity.reduce((a,b) => a + b.count, 0);
 
-  // ✅ Stat cards — quiz accuracy and flashcard decks from localStorage
   const statCards = [
     {
       title: "Day Streak",
@@ -343,7 +332,6 @@ function Dashboard() {
     },
     {
       title: "Flashcard Decks",
-      // ✅ local count updates instantly; falls back to server
       value: flashdeckCount > 0 ? flashdeckCount : (stats?.flashcardsReviewed || 0),
       icon: "🃏", color: "#6366f1",
       sub: flashdeckCount > 0
@@ -352,7 +340,6 @@ function Dashboard() {
     },
     {
       title: "Quiz Accuracy",
-      // ✅ local accuracy updates instantly after quiz submit
       value: `${quizAccuracy > 0 ? quizAccuracy : (stats?.quizAccuracy || 0)}%`,
       icon: "🎯", color: "#10b981",
       sub: totalQuizzes > 0

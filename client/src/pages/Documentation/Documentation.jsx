@@ -86,7 +86,6 @@ function DocMarkdown({ content }) {
   );
 }
 
-// ── Cache helpers ──
 const getCacheKey = (topic) => {
   const uid = localStorage.getItem("userId") || "guest";
   return `vai_doc_${uid}_${topic.toLowerCase().replace(/\s+/g,"_")}`;
@@ -160,7 +159,6 @@ function Documentation() {
   };
   const removeFile = () => { setFile(null); if (fileRef.current) fileRef.current.value=""; };
 
-  // ✅ Updated: sends Authorization token + handles 429 rate-limit responses
   const generate = async () => {
     const topicName = topic || "General Topic";
     try {
@@ -174,7 +172,6 @@ function Documentation() {
         method: "POST",
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          // ❌ do NOT set Content-Type here — fetch sets the multipart boundary automatically for FormData
         },
         body: form,
       });

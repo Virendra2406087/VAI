@@ -1,4 +1,3 @@
-// client/src/components/RateLimitToast.jsx
 import React, { useEffect } from "react";
 
 function RateLimitToast({ message, onClose }) {

@@ -3,21 +3,21 @@ const regenerateContent = async () => {
     setLoading(true);
 
     const formData = new FormData();
-    formData.append("topic", topic); // Ensure topic is appended
+    formData.append("topic", topic); 
 
     if (file) {
-      formData.append("file", file); // Ensure file is appended
+      formData.append("file", file); 
     } else {
-      console.error("No file selected for upload."); // Log if no file is selected
+      console.error("No file selected for upload."); 
     }
 
     const response = await fetch("http://localhost:5000/api/docs/generate", {
       method: "POST",
-      body: formData, // ❗ important (no JSON)
+      body: formData, // 
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`); // Throw error if response is not ok
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
@@ -30,7 +30,7 @@ const regenerateContent = async () => {
     }
 
   } catch (error) {
-    console.error("Error during content regeneration:", error); // Log the error
+    console.error("Error during content regeneration:", error); 
   } finally {
     setLoading(false);
   }

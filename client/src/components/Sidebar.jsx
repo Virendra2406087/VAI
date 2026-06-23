@@ -25,13 +25,11 @@ function Sidebar() {
 
   const [showLogout, setShowLogout] = useState(false);
 
-  // ✅ Reactive theme — initialises from localStorage, updates via event
   const [theme, setTheme] = useState(
     () => localStorage.getItem("theme") || "dark"
   );
   const isDark = theme === "dark";
 
-  // ✅ Listen for theme changes dispatched by Navbar
   useEffect(() => {
     const handler = e => setTheme(e.detail.theme);
     window.addEventListener("themeChanged", handler);
@@ -40,7 +38,6 @@ function Sidebar() {
 
   const handleLogout = () => { localStorage.clear(); navigate("/login"); };
 
-  // ── All styles react to isDark ──
   const S = {
     sidebar: {
       width: 220,

@@ -1,4 +1,3 @@
-// server/models/Documentation.js
 const mongoose = require("mongoose");
 
 const documentationSchema = new mongoose.Schema(

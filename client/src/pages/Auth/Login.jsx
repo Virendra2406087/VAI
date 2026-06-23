@@ -21,14 +21,10 @@ export default function Login() {
 
       const incomingId = data.user?._id || "";
 
-      // ✅ Only clear cache if a DIFFERENT user is logging in
-      // This preserves docs/flashcards/quiz/history for returning users
       const existingId = localStorage.getItem("userId");
       if (existingId && existingId !== incomingId) {
-        // Different user — clear everything
         localStorage.clear();
       }
-      // Same user or first login — keep their cached content
 
       localStorage.setItem("token",     data.token);
       localStorage.setItem("name",      data.user?.name  || "");
@@ -36,7 +32,6 @@ export default function Login() {
       localStorage.setItem("userId",    incomingId);
       localStorage.setItem("loginTime", new Date().toISOString());
 
-      // ✅ Remember Me — store email for next login
       if (rememberMe) {
         localStorage.setItem("rememberedEmail", email);
       } else {
@@ -49,7 +44,6 @@ export default function Login() {
     } finally { setLoading(false); }
   };
 
-  // ✅ Pre-fill email if remembered
   useState(() => {
     const remembered = localStorage.getItem("rememberedEmail");
     if (remembered) setEmail(remembered);
@@ -91,7 +85,6 @@ export default function Login() {
           </div>
         </div>
 
-        {/* ✅ Remember Me checkbox */}
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
           <input
             type="checkbox"

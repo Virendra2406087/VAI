@@ -1,4 +1,3 @@
-// server/config/aiConfig.js
 const { GoogleGenAI } = require("@google/genai");
 
 if (!process.env.GEMINI_API_KEY) {
@@ -6,8 +5,6 @@ if (!process.env.GEMINI_API_KEY) {
 }
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-// ── Models to try in order ──
 const MODELS = [
   "gemini-2.5-flash",
   "gemini-2.0-flash",
@@ -15,10 +12,8 @@ const MODELS = [
   "gemini-1.5-flash-8b",
 ];
 
-// ── Wait helper ──
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// ── Generate with retry + model fallback ──
 const generateWithGemini = async (prompt, retries = 3) => {
   let lastError;
 
@@ -38,34 +33,25 @@ const generateWithGemini = async (prompt, retries = 3) => {
       } catch (error) {
         lastError = error;
         const status = error.status || error.code;
-
-        // ── 503 / 429 → retry with backoff ──
         if (status === 503 || status === 429 || error.message?.includes("UNAVAILABLE") || error.message?.includes("overloaded")) {
           const delay = attempt * 2000; // 2s, 4s, 6s
           console.warn(`⚠️  Model ${model} unavailable (attempt ${attempt}/${retries}). Retrying in ${delay/1000}s...`);
           await wait(delay);
           continue;
         }
-
-        // ── 400 bad request → skip this model ──
         if (status === 400) {
           console.warn(`⚠️  Model ${model} bad request. Trying next model...`);
           break;
         }
-
-        // ── 401 invalid key → throw immediately ──
         if (status === 401) {
           throw new Error("Invalid Gemini API key. Check your .env file.");
         }
-
-        // ── Other error → try next model ──
         console.warn(`⚠️  Model ${model} failed: ${error.message}. Trying next model...`);
         break;
       }
     }
   }
 
-  // All models failed
   const status = lastError?.status || lastError?.code;
   if (status === 503) throw { status: 503, message: "Gemini is overloaded right now. Please try again in a minute." };
   if (status === 429) throw { status: 429, message: "AI quota exceeded. Please try again later." };

@@ -565,7 +565,7 @@ useEffect(() => {
       <div style={S.right}>
 
         {/* Theme toggle */}
-        <button
+        {/* <button
           style={S.iconBtn}
           onClick={toggleTheme}
           onMouseEnter={hoverIconBtn}
@@ -573,7 +573,7 @@ useEffect(() => {
           title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
           {isDark ? "☀️" : "🌙"}
-        </button>
+        </button> */}
 
         {/* Notifications */}
         <div style={{ position: "relative" }} ref={notifRef}>

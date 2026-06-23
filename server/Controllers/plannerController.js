@@ -1,4 +1,3 @@
-// server/controllers/plannerController.js
 const StudyPlan = require("../models/StudyPlan");
 
 // ✅ CREATE

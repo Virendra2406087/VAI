@@ -58,7 +58,7 @@ body::before {
     radial-gradient(ellipse at 80% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
     radial-gradient(ellipse at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 60%);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 /* ============================================
@@ -84,11 +84,15 @@ body::before {
   z-index: 1;
 }
 
+/* AFTER */
 .page-main {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  overflow-x: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 .page-content {

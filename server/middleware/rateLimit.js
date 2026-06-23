@@ -1,8 +1,9 @@
 // server/middleware/rateLimit.js
 const User = require("../models/User");
 
-const MAX_REQUESTS = 20;          // change to whatever limit you want
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes — change as needed
+const MAX_REQUESTS = 20;
+// 15 minutes          
+const WINDOW_MS = 15 * 60 * 1000; 
 
 const aiRateLimiter = async (req, res, next) => {
   try {

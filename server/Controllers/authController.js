@@ -45,7 +45,7 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// ✅ GET PROFILE BY EMAIL (used by Settings)
+// ✅ GET PROFILE BY EMAIL
 exports.getProfileByEmail = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.params.email }).select("-password");
