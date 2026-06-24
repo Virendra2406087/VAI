@@ -99,6 +99,11 @@ useEffect(() => {
 
   const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
 
+  // ✅ Tells Sidebar to open/close the mobile drawer
+  const toggleSidebar = () => {
+    window.dispatchEvent(new CustomEvent("toggleSidebar"));
+  };
+
   const handleSearchKey = e => {
     if (e.key === "Enter" && search.trim()) {
       navigate("/topics");
@@ -145,6 +150,25 @@ useEffect(() => {
       top: 0,
       zIndex: 99,
       flexShrink: 0,
+    },
+
+    mobileMenuBtn: {
+      width: 38,
+      height: 38,
+      borderRadius: 9,
+      border: isDark
+        ? "1px solid rgba(255,255,255,0.07)"
+        : "1.5px solid rgba(109,40,217,0.18)",
+      background: isDark
+        ? "rgba(255,255,255,0.04)"
+        : "rgba(237,233,254,0.65)",
+      alignItems: "center",
+      justifyContent: "center",
+      cursor: "pointer",
+      fontSize: 18,
+      color: isDark ? "#e2e8f0" : "#3b0764",
+      flexShrink: 0,
+      transition: "background 0.2s, border-color 0.2s",
     },
 
     pageTitle: {
@@ -510,6 +534,18 @@ useEffect(() => {
 
   return (
     <div style={S.navbar}>
+
+      {/* ✅ MOBILE HAMBURGER — hidden by default, shown only ≤768px via .mobile-menu-btn CSS */}
+      <button
+        className="mobile-menu-btn"
+        style={S.mobileMenuBtn}
+        onClick={toggleSidebar}
+        onMouseEnter={hoverIconBtn}
+        onMouseLeave={unhoverIconBtn}
+        title="Toggle menu"
+      >
+        ☰
+      </button>
 
       {/* LEFT — Page title */}
       <div style={S.pageTitle}>

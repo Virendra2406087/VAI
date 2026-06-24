@@ -25,19 +25,35 @@ function Sidebar() {
 
   const [showLogout, setShowLogout] = useState(false);
 
+  // ✅ Mobile drawer open/closed state
+  const [open, setOpen] = useState(false);
+
+  // ✅ Reactive theme — initialises from localStorage, updates via event
   const [theme, setTheme] = useState(
     () => localStorage.getItem("theme") || "dark"
   );
   const isDark = theme === "dark";
 
+  // ✅ Listen for theme changes dispatched by Navbar
   useEffect(() => {
     const handler = e => setTheme(e.detail.theme);
     window.addEventListener("themeChanged", handler);
     return () => window.removeEventListener("themeChanged", handler);
   }, []);
 
+  // ✅ Listen for mobile hamburger toggle dispatched by Navbar
+  useEffect(() => {
+    const handler = () => setOpen(v => !v);
+    window.addEventListener("toggleSidebar", handler);
+    return () => window.removeEventListener("toggleSidebar", handler);
+  }, []);
+
   const handleLogout = () => { localStorage.clear(); navigate("/login"); };
 
+  // Close the drawer after navigating (mobile UX — tapping a link should close it)
+  const closeDrawer = () => setOpen(false);
+
+  // ── All styles react to isDark ──
   const S = {
     sidebar: {
       width: 220,
@@ -266,63 +282,73 @@ function Sidebar() {
   });
 
   return (
-    <div style={S.sidebar}>
-      {/* ── LOGO ── */}
-      <div style={S.logo}>
-        <img src="/VAI.jpeg" alt="VAI" style={S.logoImg} />
-        <span style={S.logoText}>VAI</span>
-      </div>
+    <>
+      {/* ✅ Backdrop — only visible/clickable on mobile when drawer is open */}
+      <div
+        className={`sidebar-backdrop ${open ? "show" : ""}`}
+        onClick={closeDrawer}
+      />
 
-      {/* ── MAIN MENU ── */}
-      <nav style={S.nav}>
-        <p style={S.sectionLabel}>Main Menu</p>
-        {MENU.map(item => (
-          <NavLink key={item.to} to={item.to} style={linkStyle}>
-            <span style={S.linkIcon}>{item.icon}</span>
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
-      </nav>
-
-      {/* ── BOTTOM ── */}
-      <div style={S.bottom}>
-        <p style={S.sectionLabel}>Account</p>
-        {BOTTOM.map(item => (
-          <NavLink key={item.to} to={item.to} style={linkStyle}>
-            <span style={S.linkIcon}>{item.icon}</span>
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
-
-        {/* USER CARD */}
-        <div
-          style={S.userCard}
-          onClick={() => setShowLogout(v => !v)}
-          onMouseEnter={hoverCard}
-          onMouseLeave={unhoverCard}
-        >
-          <div style={S.userAvatar}>{initials}</div>
-          <div style={S.userInfo}>
-            <div style={S.userName}>{name.split(" ")[0]}</div>
-            <div style={S.userEmail}>
-              {email.slice(0, 18)}{email.length > 18 ? "…" : ""}
-            </div>
-          </div>
-          <span style={S.dotsIcon}>⋮</span>
+      {/* ✅ className="sidebar" lets the responsive CSS control the off-canvas
+          transform on mobile; inline style={S.sidebar} still controls all colors/theme */}
+      <div className={`sidebar ${open ? "open" : ""}`} style={S.sidebar}>
+        {/* ── LOGO ── */}
+        <div style={S.logo}>
+          <img src="/VAI.jpeg" alt="VAI" style={S.logoImg} />
+          <span style={S.logoText}>VAI</span>
         </div>
 
-        {showLogout && (
-          <button
-            style={S.logoutBtn}
-            onClick={handleLogout}
-            onMouseEnter={hoverLogout}
-            onMouseLeave={unhoverLogout}
+        {/* ── MAIN MENU ── */}
+        <nav style={S.nav}>
+          <p style={S.sectionLabel}>Main Menu</p>
+          {MENU.map(item => (
+            <NavLink key={item.to} to={item.to} style={linkStyle} onClick={closeDrawer}>
+              <span style={S.linkIcon}>{item.icon}</span>
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* ── BOTTOM ── */}
+        <div style={S.bottom}>
+          <p style={S.sectionLabel}>Account</p>
+          {BOTTOM.map(item => (
+            <NavLink key={item.to} to={item.to} style={linkStyle} onClick={closeDrawer}>
+              <span style={S.linkIcon}>{item.icon}</span>
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
+
+          {/* USER CARD */}
+          <div
+            style={S.userCard}
+            onClick={() => setShowLogout(v => !v)}
+            onMouseEnter={hoverCard}
+            onMouseLeave={unhoverCard}
           >
-            🚪 Sign Out
-          </button>
-        )}
+            <div style={S.userAvatar}>{initials}</div>
+            <div style={S.userInfo}>
+              <div style={S.userName}>{name.split(" ")[0]}</div>
+              <div style={S.userEmail}>
+                {email.slice(0, 18)}{email.length > 18 ? "…" : ""}
+              </div>
+            </div>
+            <span style={S.dotsIcon}>⋮</span>
+          </div>
+
+          {showLogout && (
+            <button
+              style={S.logoutBtn}
+              onClick={handleLogout}
+              onMouseEnter={hoverLogout}
+              onMouseLeave={unhoverLogout}
+            >
+              🚪 Sign Out
+            </button>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
