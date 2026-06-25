@@ -4323,13 +4323,14 @@ pre {
   .sidebar.open,
   .sidebar-new.open {
     transform: translateX(0);
+    z-index: 250 !important;
   }
 
   .sidebar-backdrop {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.5);
-    z-index: 150;
+    z-index: 150 !important;
     display: none;
   }
   .sidebar-backdrop.show { display: block; }

@@ -28,13 +28,13 @@ const generateWithGemini = async (prompt, retries = 3) => {
         });
 
         console.log(`✅ Success with model: ${model}`);
-        return response.text;
+        return response.text();   // ✅ FIXED — was response.text (missing parentheses)
 
       } catch (error) {
         lastError = error;
         const status = error.status || error.code;
         if (status === 503 || status === 429 || error.message?.includes("UNAVAILABLE") || error.message?.includes("overloaded")) {
-          const delay = attempt * 2000; // 2s, 4s, 6s
+          const delay = attempt * 2000;
           console.warn(`⚠️  Model ${model} unavailable (attempt ${attempt}/${retries}). Retrying in ${delay/1000}s...`);
           await wait(delay);
           continue;

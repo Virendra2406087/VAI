@@ -8,6 +8,29 @@ if (!process.env.GEMINI_API_KEY) {
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+// ── Model fallback chain: try each in order until one works ──
+const MODELS = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+
+const generateWithFallback = async (params) => {
+  let lastError;
+  for (const model of MODELS) {
+    try {
+      const response = await ai.models.generateContent({ ...params, model });
+      return response;
+    } catch (err) {
+      // 503 = overloaded, 429 = quota — try next model
+      if (err.status === 503 || err.status === 429) {
+        console.warn(`⚠️ Model ${model} unavailable (${err.status}), trying next...`);
+        lastError = err;
+        await new Promise(r => setTimeout(r, 1500)); // wait 1.5s before retry
+        continue;
+      }
+      throw err; // other errors — don't retry
+    }
+  }
+  throw lastError; // all models failed
+};
+
 const SYSTEM_PROMPT = `You are VAI, an expert AI tutor for programming, DSA, physics, mathematics, and computer science.
 
 FORMATTING RULES:
@@ -61,14 +84,13 @@ exports.askTutor = async (req, res) => {
           : "Please analyze the uploaded content and provide a detailed explanation."
       });
 
-      const response = await ai.models.generateContent({
-        model:    "gemini-2.5-flash",
+      const response = await generateWithFallback({
         contents: [{ role: "user", parts }],
       });
       answer = response.text;
+
     } else {
-      const response = await ai.models.generateContent({
-        model:    "gemini-2.5-flash",
+      const response = await generateWithFallback({
         contents: `${SYSTEM_PROMPT}\n\nStudent question: ${question}`,
       });
       answer = response.text;
@@ -92,6 +114,7 @@ exports.askTutor = async (req, res) => {
   } catch (error) {
     console.error("❌ Tutor Error:", error);
     if (error.status === 429) return res.status(429).json({ error: "AI quota exceeded. Try again later." });
+    if (error.status === 503) return res.status(503).json({ error: "AI is overloaded right now. Please try again in a moment." });
     res.status(500).json({ error: error.message || "AI not working" });
   }
 };

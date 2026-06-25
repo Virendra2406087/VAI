@@ -75,7 +75,7 @@ function Sidebar() {
       position: "sticky",
       top: 0,
       height: "100vh",
-      zIndex: 100,
+      zIndex: 250,
       flexShrink: 0,
       transition: "background 0.3s, border-color 0.3s, box-shadow 0.3s",
     },
