@@ -96,7 +96,6 @@ function FileBubble({ file, previewUrl }) {
   );
 }
 
-
 // ── Chat cache helpers ──
 const getChatKey = () => {
   const uid = localStorage.getItem("userId") || "guest";
@@ -130,7 +129,7 @@ export default function AITutor() {
   const [input,      setInput]      = useState("");
   const [typing,     setTyping]     = useState(false);
   const [error,      setError]      = useState("");
-  const [files,      setFiles]      = useState([]);        // [{file, previewUrl, base64}]
+  const [files,      setFiles]      = useState([]);
   const [showAttach, setShowAttach] = useState(false);
 
   const chatEndRef  = useRef(null);
@@ -139,12 +138,10 @@ export default function AITutor() {
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages, typing]);
 
-  // ── Handle file selection ──
   const handleFiles = async (selectedFiles) => {
     const newFiles = [];
     for (const file of selectedFiles) {
       const previewUrl = file.type.startsWith("image/") ? URL.createObjectURL(file) : null;
-      // Convert to base64 for sending to backend
       const base64 = await toBase64(file);
       newFiles.push({ file, previewUrl, base64, type: file.type });
     }
@@ -161,14 +158,12 @@ export default function AITutor() {
 
   const removeFile = (i) => setFiles(prev => prev.filter((_,j)=>j!==i));
 
-  // ── Send message ──
   const send = async () => {
     if ((!input.trim() && files.length===0) || typing) return;
     const q       = input.trim();
     const sentFiles = [...files];
     setInput(""); setFiles([]); setError(""); setTyping(true);
 
-    // Add user message to chat
     setMessages(p => {
       const updated = [...p, { role:"user", content:q, files:sentFiles }];
       saveChat(updated);
@@ -176,12 +171,7 @@ export default function AITutor() {
     });
 
     try {
-      // Build request — include files if any
-      const hasImages = sentFiles.some(f=>f.type.startsWith("image/"));
-      const hasFiles  = sentFiles.some(f=>!f.type.startsWith("image/"));
-
       let payload = { question: q };
-
       if (sentFiles.length > 0) {
         payload.attachments = sentFiles.map(f => ({
           name:     f.file.name,
@@ -192,14 +182,10 @@ export default function AITutor() {
       }
 
       const res = await axios.post(
-  `${API_BASE_URL}/api/tutor/ask`,
-  payload,
-  {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  }
-);
+        `${API_BASE_URL}/api/tutor/ask`,
+        payload,
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      );
       const answer = res.data.answer;
       setMessages(p => {
         const updated = [...p, { role:"ai", content:answer }];
@@ -209,14 +195,14 @@ export default function AITutor() {
       if (q) trackTutor(q, answer);
 
     } catch(err) {
-  if (err.response?.status === 429) {
-    triggerRateLimitToast(err.response.data.message);
-    return;
-  }
-  const msg = "❌ Could not reach server.";
-  setError(msg);
-  setMessages(p => [...p, { role:"ai", content:msg }]);
-} finally { setTyping(false); }
+      if (err.response?.status === 429) {
+        triggerRateLimitToast(err.response.data.message);
+        return;
+      }
+      const msg = "❌ Could not reach server.";
+      setError(msg);
+      setMessages(p => [...p, { role:"ai", content:msg }]);
+    } finally { setTyping(false); }
   };
 
   const onKey = (e) => { if (e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();} };
@@ -244,6 +230,7 @@ export default function AITutor() {
         <Navbar />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"/>
 
+        {/* ✅ FIX: removed fixed height, use flex-grow to fill remaining space */}
         <div style={S.container}>
 
           {/* Header */}
@@ -261,7 +248,6 @@ export default function AITutor() {
               <div key={i} style={{...S.row,...(msg.role==="user"?S.rowUser:{})}}>
                 <div style={S.avatar}>{msg.role==="ai"?"🤖":"👤"}</div>
                 <div style={{...S.bubble,...(msg.role==="user"?S.bubbleUser:S.bubbleAI)}}>
-                  {/* File previews */}
                   {msg.files && msg.files.length>0 && (
                     <div style={S.filePreviews}>
                       {msg.files.map((f,j) => (
@@ -269,7 +255,6 @@ export default function AITutor() {
                       ))}
                     </div>
                   )}
-                  {/* Text content */}
                   {msg.content && (
                     msg.role==="ai"
                       ? <BubbleContent content={msg.content}/>
@@ -279,7 +264,6 @@ export default function AITutor() {
               </div>
             ))}
 
-            {/* Typing indicator */}
             {typing && (
               <div style={S.row}>
                 <div style={S.avatar}>🤖</div>
@@ -321,14 +305,11 @@ export default function AITutor() {
 
           {/* Input area */}
           <div style={S.inputArea}>
-
-            {/* Hidden file inputs */}
             <input ref={imageRef} type="file" accept="image/*" multiple style={{display:"none"}}
               onChange={e=>handleFiles(Array.from(e.target.files))}/>
             <input ref={fileRef}  type="file" accept=".pdf,.txt,.md,.js,.py,.java,.cpp,.c" multiple style={{display:"none"}}
               onChange={e=>handleFiles(Array.from(e.target.files))}/>
 
-            {/* Attach button + popup */}
             <div style={{position:"relative"}}>
               <button style={{...S.attachBtn,background:showAttach?"rgba(124,58,237,0.2)":"rgba(255,255,255,0.06)"}}
                 onClick={()=>setShowAttach(v=>!v)}
@@ -357,7 +338,6 @@ export default function AITutor() {
               )}
             </div>
 
-            {/* Text input */}
             <textarea
               placeholder={files.length>0
                 ? "Ask about the uploaded file/image… (Enter to send)"
@@ -369,7 +349,6 @@ export default function AITutor() {
               style={S.textarea}
             />
 
-            {/* Send button */}
             <button onClick={send} disabled={!canSend}
               style={{...S.sendBtn, opacity:canSend?1:0.45}}
             >➤</button>
@@ -385,19 +364,40 @@ export default function AITutor() {
         .katex-display>.katex{color:#e2d9f3!important;font-size:1.25em!important;}
         .katex .mord,.katex .mbin,.katex .mrel,.katex .mopen,.katex .mclose,.katex .mfrac,.katex .minner,.katex .mop{color:#e2d9f3!important;}
         .katex:not(.katex-display .katex){background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.2);border-radius:4px;padding:1px 6px;color:#c4b5fd!important;}
+
+        /* ✅ Mobile fixes */
+        @media (max-width: 768px) {
+          .tutor-container {
+            padding: 12px !important;
+            gap: 8px !important;
+          }
+          .tutor-suggestions {
+            display: none !important;
+          }
+        }
       `}</style>
     </div>
   );
 }
 
-// Page styles
+// ✅ FIXED styles — removed fixed height, use flex to fill space
 const S = {
-  container:   { padding:24, display:"flex", flexDirection:"column", height:"calc(100vh - 68px)", gap:12 },
+  container: {
+    padding: 24,
+    display: "flex",
+    flexDirection: "column",
+    // ✅ KEY FIX: instead of height:calc(100vh - 68px) which collapses on mobile,
+    // use flex:1 + minHeight:0 so it grows to fill .page-main properly
+    flex: 1,
+    minHeight: 0,
+    gap: 12,
+    overflow: "hidden",   // ✅ prevent double scrollbars
+  },
   header:      { display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexShrink:0 },
   title:       { fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800, background:"linear-gradient(135deg,#a855f7,#3b82f6)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" },
   sub:         { fontSize:13, color:"#64748b", marginTop:3 },
-  clearBtn:    { padding:"8px 16px", borderRadius:8, border:"1px solid rgba(255,255,255,0.08)", background:"rgba(255,255,255,0.04)", color:"#94a3b8", fontSize:13, fontWeight:600, cursor:"pointer" },
-  chatBox:     { flex:1, overflowY:"auto", padding:20, background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:16, backdropFilter:"blur(20px)", display:"flex", flexDirection:"column", gap:20, scrollbarWidth:"thin", scrollbarColor:"rgba(124,58,237,0.3) transparent" },
+  clearBtn:    { padding:"8px 16px", borderRadius:8, border:"1px solid rgba(255,255,255,0.08)", background:"rgba(255,255,255,0.04)", color:"#94a3b8", fontSize:13, fontWeight:600, cursor:"pointer", flexShrink:0 },
+  chatBox:     { flex:1, minHeight:0, overflowY:"auto", padding:20, background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:16, backdropFilter:"blur(20px)", display:"flex", flexDirection:"column", gap:20, scrollbarWidth:"thin", scrollbarColor:"rgba(124,58,237,0.3) transparent" },
   row:         { display:"flex", alignItems:"flex-start", gap:12, animation:"fadeIn 0.3s ease" },
   rowUser:     { flexDirection:"row-reverse" },
   avatar:      { width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0 },
@@ -409,15 +409,11 @@ const S = {
   filePreviews:{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:10 },
   suggestions: { display:"flex", gap:8, flexWrap:"wrap", flexShrink:0 },
   suggBtn:     { padding:"8px 14px", borderRadius:8, border:"1px solid rgba(255,255,255,0.07)", background:"rgba(255,255,255,0.03)", color:"#94a3b8", fontSize:12, fontWeight:500, cursor:"pointer", transition:"border-color 0.2s", fontFamily:"sans-serif", textAlign:"left" },
-
-  // File preview bar
   fileBar:     { display:"flex", gap:8, flexWrap:"wrap", padding:"10px 14px", background:"rgba(124,58,237,0.06)", border:"1px solid rgba(124,58,237,0.15)", borderRadius:10, flexShrink:0 },
   fileChip:    { display:"flex", alignItems:"center", gap:8, padding:"6px 10px", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(124,58,237,0.25)", borderRadius:8 },
   chipImg:     { width:32, height:32, borderRadius:6, objectFit:"cover" },
   chipName:    { fontSize:12, color:"#c4b5fd", fontWeight:600 },
   chipRemove:  { background:"none", border:"none", color:"#a855f7", cursor:"pointer", fontSize:13, padding:"0 2px", lineHeight:1 },
-
-  // Input
   inputArea:   { display:"flex", gap:8, alignItems:"flex-end", flexShrink:0, position:"relative" },
   attachBtn:   { width:44, height:44, borderRadius:10, border:"1px solid rgba(255,255,255,0.1)", color:"#e2e8f0", cursor:"pointer", fontSize:20, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.2s" },
   attachMenu:  { position:"absolute", bottom:"calc(100% + 10px)", left:0, background:"rgba(13,13,26,0.98)", border:"1px solid rgba(124,58,237,0.25)", borderRadius:12, padding:8, display:"flex", flexDirection:"column", gap:4, zIndex:100, width:220, boxShadow:"0 12px 40px rgba(0,0,0,0.5)", backdropFilter:"blur(20px)" },
@@ -429,7 +425,6 @@ const S = {
   sendBtn:     { width:48, height:48, borderRadius:10, background:"linear-gradient(135deg,#7c3aed,#a855f7)", color:"white", border:"none", cursor:"pointer", fontSize:18, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow:"0 4px 15px rgba(124,58,237,0.4)", transition:"all 0.2s" },
 };
 
-// File bubble styles
 const FB = {
   wrap:     { maxWidth:240 },
   img:      { maxWidth:240, maxHeight:200, borderRadius:10, display:"block", border:"1px solid rgba(255,255,255,0.1)" },
@@ -438,7 +433,6 @@ const FB = {
   fileMeta: { fontSize:11, color:"#64748b", marginTop:2 },
 };
 
-// Markdown styles
 const MS = {
   h1:{ fontFamily:"'Syne',sans-serif", fontSize:"1.7em", fontWeight:800, background:"linear-gradient(135deg,#e2d9f3,#a855f7)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text", marginTop:20, marginBottom:10 },
   h2:{ fontFamily:"'Syne',sans-serif", fontSize:"1.3em", fontWeight:700, color:"#c4b5fd", marginTop:18, marginBottom:8, paddingBottom:6, borderBottom:"1px solid rgba(124,58,237,0.2)" },
@@ -459,7 +453,6 @@ const MS = {
   link:  { color:"#60a5fa", textDecoration:"none", fontWeight:500 },
 };
 
-// Code block styles
 const CS = {
   wrap:         { borderRadius:10, overflow:"hidden", marginBottom:14, marginTop:4, border:"1px solid rgba(255,255,255,0.08)" },
   header:       { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 14px", background:"rgba(0,0,0,0.5)", borderBottom:"1px solid rgba(255,255,255,0.06)" },
