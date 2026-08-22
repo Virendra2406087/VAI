@@ -20,7 +20,12 @@ const PAGE_TITLES = {
   "/flashcards/view": { title: "Flashcards",    icon: "🃏" },
   "/quiz":            { title: "Quizzes",       icon: "🧠" },
   "/quiz/view":       { title: "Quizzes",       icon: "🧠" },
-  "/tutor":           { title: "AI Tutor",      icon: "🤖" },
+  "/tutor":           { title: "AI Tutor",      icon: <span className="vai-ai-icon">
+      ✨
+    </span> },
+    "/chat-document": { title: "Chat with Document", icon: <span className="vai-ai-icon">
+      📄
+    </span>  },
   "/planner":         { title: "Study Planner", icon: "📅" },
   "/profile":         { title: "Profile",       icon: "👤" },
   "/settings":        { title: "Settings",      icon: "⚙️" },
@@ -57,7 +62,6 @@ function Navbar() {
   const page   = PAGE_TITLES[location.pathname] || { title: "VAI", icon: "⚡" };
   const isDark = theme === "dark";
 
-  /* ── Apply theme to <html> ── */
 useEffect(() => {
   if (theme === "light") {
     document.documentElement.setAttribute("data-theme", "light");
@@ -66,11 +70,10 @@ useEffect(() => {
   }
   localStorage.setItem("theme", theme);
 
-  // ✅ THIS LINE WAS MISSING — tells Sidebar & all pages to update
   window.dispatchEvent(new CustomEvent("themeChanged", { detail: { theme } }));
 }, [theme]);
 
-  /*--- Rate Limit----         */
+  /*--- Rate Limit----*/
   useEffect(() => {
   const handler = (e) => setRateLimitMsg(e.detail.message);
   window.addEventListener("rateLimitHit", handler);
@@ -99,7 +102,7 @@ useEffect(() => {
 
   const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
 
-  // ✅ Tells Sidebar to open/close the mobile drawer
+  // Tells Sidebar to open/close the mobile drawer
   const toggleSidebar = () => {
     window.dispatchEvent(new CustomEvent("toggleSidebar"));
   };

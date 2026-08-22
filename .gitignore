@@ -26,3 +26,6 @@ dump/
 coverage/
 .cache/
 .parcel-cache/
+
+# Uploaded files
+server/uploads/

@@ -27,7 +27,9 @@ const extractTopic = (event) => {
     case "topic":
       return (event.detail || (event.title || "").replace("📚 New Topic: ", "") || "").trim();
     case "tutor":
-      return (event.title || "").replace("🤖 AI Chat: ", "").trim();
+      return (event.title || "").replace(<span className="vai-ai-icon">
+      ✨
+    </span> , "").trim();
     case "task":
       return (event.title || "").replace("✅ Task: ", "").trim();
     default:
@@ -51,8 +53,10 @@ const TYPE_CFG = {
   flashcard: { icon:"🃏", label:"Flashcards",    color:"#a855f7", btn:"Open Flashcards" },
   quiz:      { icon:"🧠", label:"Quiz",           color:"#3b82f6", btn:"Open Quiz"       },
   topic:     { icon:"📚", label:"Topic",          color:"#10b981", btn:"View Topics"     },
-  tutor:     { icon:"🤖", label:"AI Tutor",       color:"#f59e0b", btn:"Open Tutor"      },
-  task:      { icon:"✅", label:"Task",           color:"#ec4899", btn:null              },
+  tutor:     { icon:<span className="vai-ai-icon">
+      ✨
+    </span> , label:"VAI Tutor",       color:"#f59e0b", btn:"Open Tutor"      },
+  task:      { icon:"📚", label:"Task",           color:"#ec4899", btn:null              },
 };
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -86,7 +90,7 @@ export default function History() {
     if (!topic) return;
 
     if (event.type === "doc") {
-      // ✅ Read cached doc content and pass directly — no regeneration
+      //  Read cached doc content and pass directly — no regeneration
       const cached = JSON.parse(localStorage.getItem(docCacheKey(topic)) || "null");
       navigate("/docs/view", {
         state: {
@@ -98,14 +102,14 @@ export default function History() {
       });
 
     } else if (event.type === "flashcard") {
-      // ✅ Flashcards.jsx loads cache on mount using topic key
+      //  Flashcards.jsx loads cache on mount using topic key
       // Pass topic correctly — extracted from title not detail
       navigate("/flashcards/view", {
         state: { topic, autoGenerate: false }
       });
 
     } else if (event.type === "quiz") {
-      // ✅ Quiz.jsx loads cache on mount using topic key
+      //  Quiz.jsx loads cache on mount using topic key
       // Pass topic correctly — extracted from title not detail
       navigate("/quiz/view", {
         state: { topic, autoGenerate: false }
@@ -299,7 +303,7 @@ export default function History() {
                     const cfg   = TYPE_CFG[event.type]||{icon:"📌",label:event.type,color:"#64748b",btn:null};
                     const topic = extractTopic(event);
 
-                    // ✅ Check cache for this exact topic string
+                    // Check cache for this exact topic string
                     const isCached =
                       event.type==="doc"       ? hasDocCache(topic)   :
                       event.type==="flashcard" ? hasFlashCache(topic) :
@@ -352,7 +356,7 @@ export default function History() {
                           )}
                           {event.type==="tutor"&&event.detail&&(
                             <p style={{fontSize:12,color:"#64748b",margin:"3px 0 0",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                              💬 {event.detail.slice(0,80)}{event.detail.length>80?"…":""}
+                               {event.detail.slice(0,80)}{event.detail.length>80?"…":""}
                             </p>
                           )}
                         </div>

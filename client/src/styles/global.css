@@ -4425,3 +4425,31 @@ pre {
 
 @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
 @keyframes popIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+
+
+   .vai-ai-icon {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+
+   font-size: 22px;
+   font-weight: 700;
+   line-height: 1;
+
+   background: linear-gradient(
+     135deg,
+     #4285f4 0%,
+     #00bcd4 30%,
+     #8e44ad 65%,
+     #e91e63 100%
+   );
+
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   background-clip: text;
+
+   transition: transform 0.2s ease;
+ }
+ .menu-box:hover .vai-ai-icon {
+   transform: scale(1.15) rotate(8deg);
+ }

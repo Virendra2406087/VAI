@@ -20,7 +20,7 @@ const generateWithGemini = async (prompt, retries = 3) => {
   for (const model of MODELS) {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        console.log(`🤖 Trying model: ${model} (attempt ${attempt})`);
+        console.log(`✨ Trying model: ${model} (attempt ${attempt})`);
 
         const response = await ai.models.generateContent({
           model,
@@ -28,7 +28,7 @@ const generateWithGemini = async (prompt, retries = 3) => {
         });
 
         console.log(`✅ Success with model: ${model}`);
-        return response.text();   // ✅ FIXED — was response.text (missing parentheses)
+        return response.text();   //  FIXED — was response.text (missing parentheses)
 
       } catch (error) {
         lastError = error;

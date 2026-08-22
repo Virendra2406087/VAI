@@ -9,7 +9,7 @@ const getUserId = (req) => {
   } catch { return null; }
 };
 
-// ➕ CREATE — save with userId
+//  CREATE — save with userId
 exports.createTopic = async (req, res) => {
   try {
     const { title } = req.body;
@@ -22,7 +22,7 @@ exports.createTopic = async (req, res) => {
   }
 };
 
-// 📥 GET ALL — filter by userId
+//  GET ALL — filter by userId
 exports.getTopics = async (req, res) => {
   try {
     const userId = getUserId(req);
@@ -34,7 +34,7 @@ exports.getTopics = async (req, res) => {
   }
 };
 
-// 🔍 GET SINGLE
+//  GET SINGLE
 exports.getTopicById = async (req, res) => {
   try {
     const topic = await Topic.findById(req.params.id);
@@ -45,7 +45,7 @@ exports.getTopicById = async (req, res) => {
   }
 };
 
-// ✏️ UPDATE
+//  UPDATE
 exports.updateTopic = async (req, res) => {
   try {
     const topic = await Topic.findByIdAndUpdate(req.params.id, req.body, { new:true });
@@ -55,7 +55,7 @@ exports.updateTopic = async (req, res) => {
   }
 };
 
-// ❌ DELETE
+//  DELETE
 exports.deleteTopic = async (req, res) => {
   try {
     await Topic.findByIdAndDelete(req.params.id);

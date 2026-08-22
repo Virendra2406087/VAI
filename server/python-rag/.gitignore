@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+env/
+.venv/
+*.egg-info/
+
+# Vector store / embeddings (often large, shouldn't be committed)
+faiss_index/
+*.index
+chroma_db/

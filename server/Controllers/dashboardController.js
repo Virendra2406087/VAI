@@ -36,7 +36,7 @@ exports.getDashboard = async (req, res) => {
       Documentation.find(filter).sort({ createdAt: -1 }),
     ]);
 
-    // ✅ Real quiz accuracy from scores
+    //  Real quiz accuracy from scores
     let quizAccuracy = 0;
     if (quizzes.length > 0) {
       const scores = quizzes
@@ -47,7 +47,7 @@ exports.getDashboard = async (req, res) => {
         : 0;
     }
 
-    // ✅ Weekly activity — count of items created per day for last 7 days
+    //  Weekly activity — count of items created per day for last 7 days
     const now   = new Date();
     const days  = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
     const weeklyActivity = Array.from({ length: 7 }, (_, i) => {
@@ -65,7 +65,7 @@ exports.getDashboard = async (req, res) => {
       return { day: days[d.getDay()], count, date: d.toDateString() };
     });
 
-    // ✅ Daily progress — cumulative % of total items created up to each day
+    //  Daily progress — cumulative % of total items created up to each day
     const totalItems = topics.length + docs.length + flashcards.length + quizzes.length;
     let cumulative = 0;
     const dailyProgress = weeklyActivity.map(w => {

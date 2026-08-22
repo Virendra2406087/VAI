@@ -1,6 +1,6 @@
 const StudyPlan = require("../models/StudyPlan");
 
-// ✅ CREATE
+//  CREATE
 exports.createPlanner = async (req, res) => {
   try {
     const { goal, duration, dailyTime, topics } = req.body;
@@ -14,7 +14,7 @@ exports.createPlanner = async (req, res) => {
   }
 };
 
-// ✅ GET ALL
+//  GET ALL
 exports.getPlanner = async (req, res) => {
   try {
     const plans = await StudyPlan.find().sort({ createdAt: -1 });
@@ -24,7 +24,7 @@ exports.getPlanner = async (req, res) => {
   }
 };
 
-// ✅ UPDATE
+//  UPDATE
 exports.updatePlanner = async (req, res) => {
   try {
     const plan = await StudyPlan.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -35,7 +35,7 @@ exports.updatePlanner = async (req, res) => {
   }
 };
 
-// ✅ DELETE
+//  DELETE
 exports.deletePlanner = async (req, res) => {
   try {
     await StudyPlan.findByIdAndDelete(req.params.id);

@@ -78,7 +78,7 @@ function BubbleContent({ content }) {
 
 // ── File preview bubble in chat ──
 function FileBubble({ file, previewUrl }) {
-  const isImage = file.type.startsWith("image/");
+  const isImage = file?.type?.startsWith("image/") ?? false;
   return (
     <div style={FB.wrap}>
       {isImage ? (
@@ -208,7 +208,7 @@ export default function AITutor() {
   const onKey = (e) => { if (e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();} };
 
   const clear = () => {
-    const welcome = {role:"ai",content:"Hello 👋 Ask me anything, or upload an image/file!"};
+    const welcome = {role:"ai",content:"Hello 👋 Ask me anything"};
     setMessages([welcome]);
     saveChat([welcome]);
     setError(""); setFiles([]);
@@ -236,7 +236,12 @@ export default function AITutor() {
           {/* Header */}
           <div style={S.header}>
             <div>
-              <h2 style={S.title}>🤖 VAI Tutor</h2>
+              <h2 style={S.title}>
+ <span className="vai-ai-icon">
+      ✨
+    </span> 
+  
+  VAI Tutor</h2>
               <p style={S.sub}>Chat · Images · Files · Diagrams · Formulas</p>
             </div>
             <button style={S.clearBtn} onClick={clear}>🗑 Clear</button>
@@ -246,7 +251,9 @@ export default function AITutor() {
           <div style={S.chatBox}>
             {messages.map((msg,i) => (
               <div key={i} style={{...S.row,...(msg.role==="user"?S.rowUser:{})}}>
-                <div style={S.avatar}>{msg.role==="ai"?"🤖":"👤"}</div>
+                <div style={S.avatar}>{msg.role==="ai"?<span className="vai-ai-icon">
+      ✨
+    </span>:"👤"}</div>
                 <div style={{...S.bubble,...(msg.role==="user"?S.bubbleUser:S.bubbleAI)}}>
                   {msg.files && msg.files.length>0 && (
                     <div style={S.filePreviews}>
@@ -266,7 +273,9 @@ export default function AITutor() {
 
             {typing && (
               <div style={S.row}>
-                <div style={S.avatar}>🤖</div>
+                <div style={S.avatar}><span className="vai-ai-icon">
+      ✨
+    </span></div>
                 <div style={{...S.bubble,...S.bubbleAI,...S.typingBubble}}>
                   <span style={S.dot}/><span style={{...S.dot,animationDelay:"0.2s"}}/><span style={{...S.dot,animationDelay:"0.4s"}}/>
                 </div>
@@ -311,12 +320,12 @@ export default function AITutor() {
               onChange={e=>handleFiles(Array.from(e.target.files))}/>
 
             <div style={{position:"relative"}}>
-              <button style={{...S.attachBtn,background:showAttach?"rgba(124,58,237,0.2)":"rgba(255,255,255,0.06)"}}
+              {/* <button style={{...S.attachBtn,background:showAttach?"rgba(124,58,237,0.2)":"rgba(255,255,255,0.06)"}}
                 onClick={()=>setShowAttach(v=>!v)}
                 title="Attach file or image"
               >
                 📎
-              </button>
+              </button> */}
 
               {showAttach && (
                 <div style={S.attachMenu}>
@@ -365,7 +374,7 @@ export default function AITutor() {
         .katex .mord,.katex .mbin,.katex .mrel,.katex .mopen,.katex .mclose,.katex .mfrac,.katex .minner,.katex .mop{color:#e2d9f3!important;}
         .katex:not(.katex-display .katex){background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.2);border-radius:4px;padding:1px 6px;color:#c4b5fd!important;}
 
-        /* ✅ Mobile fixes */
+        /*  Mobile fixes */
         @media (max-width: 768px) {
           .tutor-container {
             padding: 12px !important;
@@ -386,12 +395,12 @@ const S = {
     padding: 24,
     display: "flex",
     flexDirection: "column",
-    // ✅ KEY FIX: instead of height:calc(100vh - 68px) which collapses on mobile,
+    //  KEY FIX: instead of height:calc(100vh - 68px) which collapses on mobile,
     // use flex:1 + minHeight:0 so it grows to fill .page-main properly
     flex: 1,
     minHeight: 0,
     gap: 12,
-    overflow: "hidden",   // ✅ prevent double scrollbars
+    overflow: "hidden",   //  prevent double scrollbars
   },
   header:      { display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexShrink:0 },
   title:       { fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800, background:"linear-gradient(135deg,#a855f7,#3b82f6)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" },

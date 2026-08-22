@@ -89,7 +89,7 @@ export const trackFlashcard = (topic, n) => {
       type:   "flashcard",
       title,
       detail: `${n} cards generated`,
-      topic,           // ✅ explicit topic field
+      topic,         
       time:   new Date().toISOString(),
     });
     history[dk] = history[dk].slice(0, 100);
@@ -131,7 +131,7 @@ export const trackQuiz = (topic, n) => {
       type:   "quiz",
       title,
       detail: `${n} questions generated`,
-      topic,           // ✅ explicit topic field
+      topic,           
       time:   new Date().toISOString(),
     });
     history[dk] = history[dk].slice(0, 100);
@@ -165,7 +165,7 @@ export const saveQuizScore = (topic, score, total) => {
 
     localStorage.setItem(key, JSON.stringify(stats));
 
-    // ✅ Fire quizCompleted so Dashboard re-reads stats immediately
+    //  Fire quizCompleted so Dashboard re-reads stats immediately
     window.dispatchEvent(new Event("quizCompleted"));
   } catch (e) {
     console.warn("Quiz stats save failed:", e);
@@ -218,7 +218,7 @@ export const TYPE_CONFIG = {
   flashcard: { icon:"🃏", label:"Flashcards",    color:"#a855f7", path:"/flashcards/view" },
   quiz:      { icon:"🧠", label:"Quiz",          color:"#3b82f6", path:"/quiz/view"       },
   topic:     { icon:"📚", label:"Topic",         color:"#10b981", path:"/topics"          },
-  tutor:     { icon:"🤖", label:"AI Tutor",      color:"#f59e0b", path:"/tutor"           },
+  tutor:     { icon:"🤖", label:"VAI Tutor",      color:"#f59e0b", path:"/tutor"           },
   task:      { icon:"✅", label:"Task",          color:"#ec4899", path:"/planner"         },
 };
 

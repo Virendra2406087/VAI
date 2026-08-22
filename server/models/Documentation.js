@@ -20,4 +20,4 @@ const documentationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Documentation", documentationSchema); // ✅ belongs here only
+module.exports = mongoose.model("Documentation", documentationSchema); 

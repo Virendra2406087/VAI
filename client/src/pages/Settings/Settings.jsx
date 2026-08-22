@@ -56,7 +56,7 @@ function Settings() {
   };
   const strength = pwStrength(passwords.newPass);
 
-  // ✅ Only 2 tabs: Account + Password
+  //  Only 2 tabs: Account + Password
   const tabs = [
     { id:"account",  icon:"👤", label:"Account"  },
     { id:"password", icon:"🔒", label:"Password" },

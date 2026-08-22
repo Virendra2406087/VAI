@@ -23,8 +23,10 @@ import Profile           from "./pages/Profile/Profile";
 import Settings          from "./pages/Settings/Settings";
 import History           from "./pages/History/History";
 import GoogleSuccess     from "./pages/Auth/GoogleSuccess";
+import ChatWithDocument from "./pages/ChatWithDocument/ChatWithDocument";
 
-// ✅ Auth guard
+
+//  Auth guard
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
   if (!token) return <Navigate to="/login" replace />;
@@ -58,7 +60,7 @@ function AppRoutes() {
         {/* Quiz: sidebar → upload home, generate → view */}
         <Route path="/quiz"            element={<P><QuizHome /></P>}          />
         <Route path="/quiz/view"       element={<P><Quiz /></P>}              />
-
+        <Route path="/chat-document" element={ <ProtectedRoute> <ChatWithDocument /> </ProtectedRoute>}/>
         <Route path="/tutor"           element={<P><AITutor /></P>}           />
         <Route path="/planner"         element={<P><StudyPlanner /></P>}      />
         <Route path="/history"         element={<P><History /></P>}           />

@@ -5,6 +5,7 @@ const http     = require("http");
 const cors     = require("cors");
 const morgan   = require("morgan");
 const mongoose = require("mongoose");
+const documentChatRoutes = require("./routes/documentChatRoutes");
 
 const logger     = require("./utils/logger");
 const passport   = require("./config/passport");
@@ -40,6 +41,10 @@ app.use(passport.session());
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(morgan("dev"));
+app.use(
+  "/api/document-chat",
+  documentChatRoutes
+);
 
 // ── API Routes ──
 app.use("/api/auth",       authRoutes);

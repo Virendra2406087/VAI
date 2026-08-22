@@ -90,7 +90,7 @@ useEffect(() => {
   .then(r => r.json())
   .catch(err => console.error("Score submit error:", err));
 
-}, [submitted, answers, questions, total, scoreSubmitted, topic]); // ✅ full deps
+}, [submitted, answers, questions, total, scoreSubmitted, topic]); 
 
   const generateQuiz = async () => {
   try {

@@ -353,7 +353,9 @@ function Dashboard() {
   const quickActions = [
     { title:"Flashcards",    desc:"Review your cards",   icon:"🃏", color:"#6366f1", action:() => goFlashcards(activeTopic), btn:"Study Now"  },
     { title:"Take a Quiz",   desc:"Test your knowledge", icon:"🧠", color:"#7c3aed", action:() => goQuiz(activeTopic),       btn:"Start Quiz" },
-    { title:"AI Tutor",      desc:"Ask me anything",     icon:"🤖", color:"#a855f7", action:() => navigate("/tutor"),        btn:"Chat Now"   },
+    { title:"AI Tutor",      desc:"Ask me anything",     icon:<span className="vai-ai-icon">
+      ✨
+    </span>, color:"#a855f7", action:() => navigate("/tutor"),        btn:"Chat Now"   },
     { title:"Study Planner", desc:"Plan your schedule",  icon:"📅", color:"#3b82f6", action:() => navigate("/planner"),      btn:"View Plan"  },
   ];
 
@@ -368,7 +370,7 @@ function Dashboard() {
           {/* HEADER */}
           <div style={{ marginBottom:28 }}>
             <h1 style={{ fontFamily:"'Syne',sans-serif", fontSize:28, fontWeight:800, background:T.headingGrad, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text", marginBottom:6 }}>
-              {greeting}, {name.split(" ")[0]} 👋
+              {greeting}, {name.split(" ")[0]} 
             </h1>
             <p style={{ color:T.subText, fontSize:14 }}>
               Here's your learning overview for today.

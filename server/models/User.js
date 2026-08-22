@@ -27,7 +27,7 @@ userSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// ✅ Compare password
+//  Compare password
 userSchema.methods.matchPassword = async function (enteredPassword) {
   if (!this.password.startsWith("$2")) return false; // Google user
   return await bcrypt.compare(enteredPassword, this.password);
