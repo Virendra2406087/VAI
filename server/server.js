@@ -5,6 +5,7 @@ const http     = require("http");
 const cors     = require("cors");
 const morgan   = require("morgan");
 const mongoose = require("mongoose");
+const { MongoStore } = require("connect-mongo");
 const documentChatRoutes = require("./routes/documentChatRoutes");
 
 const logger     = require("./utils/logger");
@@ -27,6 +28,9 @@ const historyRoutes       = require("./routes/historyRoutes"); // ✅ NEW
 const app    = express();
 const server = http.createServer(app);
 
+// ── Trust Render's reverse proxy (needed for secure cookies) ──
+app.set("trust proxy", 1);
+
 // ── MongoDB ──
 mongoose
   .connect(process.env.MONGO_URI)
@@ -35,7 +39,23 @@ mongoose
 
 // ── Middleware ──
 app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173", credentials: true }));
-app.use(session({ secret: process.env.JWT_SECRET, resave: false, saveUninitialized: false }));
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: "sessions",
+    ttl: 14 * 24 * 60 * 60,
+  }),
+  cookie: {
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 14 * 24 * 60 * 60 * 1000,
+  },
+}));
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json({ limit: "20mb" }));

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 
@@ -19,6 +20,19 @@ app = FastAPI(
     title="AI Learning RAG Service",
     description="RAG service for chatting with documents",
     version="1.0.0"
+)
+
+
+# ==========================================
+# CORS Middleware
+# ==========================================
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # tighten later to your specific frontend/backend URLs
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
