@@ -67,7 +67,7 @@ def retrieve_chunks(
 
     question_embedding = create_embedding(
         question,
-        task_type="retrieval_query"
+        task_type="RETRIEVAL_QUERY"
     )
 
     # --------------------------------------
