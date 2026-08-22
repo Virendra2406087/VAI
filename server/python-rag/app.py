@@ -1,4 +1,7 @@
-from fastapi import FastAPI, HTTPException
+import os
+import tempfile
+
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -40,15 +43,6 @@ app.add_middleware(
 # Request Models
 # ==========================================
 
-class ProcessDocumentRequest(BaseModel):
-
-    documentId: str
-
-    userId: str
-
-    filePath: str
-
-
 class ChatRequest(BaseModel):
 
     documentId: str
@@ -77,22 +71,38 @@ def health_check():
 
 
 # ==========================================
-# Process PDF
+# Process PDF (now accepts an uploaded file)
 # ==========================================
 
 @app.post("/api/rag/process")
-def process_document(
-    request: ProcessDocumentRequest
+async def process_document(
+    documentId: str = Form(...),
+    userId: str = Form(...),
+    file: UploadFile = File(...)
 ):
 
+    temp_path = None
+
     try:
+
+        # ----------------------------------
+        # Save uploaded file to a temp path
+        # ----------------------------------
+
+        suffix = os.path.splitext(file.filename)[1] or ".pdf"
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            content = await file.read()
+            tmp.write(content)
+            temp_path = tmp.name
+
 
         # ----------------------------------
         # Load PDF
         # ----------------------------------
 
         pages = load_pdf(
-            request.filePath
+            temp_path
         )
 
         if not pages:
@@ -124,9 +134,9 @@ def process_document(
         # ----------------------------------
 
         stored_count = store_chunks(
-            document_id=request.documentId,
+            document_id=documentId,
 
-            user_id=request.userId,
+            user_id=userId,
 
             chunks=chunks
         )
@@ -145,7 +155,7 @@ def process_document(
             ),
 
             "documentId":
-                request.documentId,
+                documentId,
 
             "pages":
                 len(pages),
@@ -175,6 +185,15 @@ def process_document(
 
             detail=str(error)
         )
+
+    finally:
+
+        # ----------------------------------
+        # Clean up temp file
+        # ----------------------------------
+
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
 
 
 # ==========================================
