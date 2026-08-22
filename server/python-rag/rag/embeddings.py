@@ -1,53 +1,57 @@
-from sentence_transformers import SentenceTransformer
+import google.generativeai as genai
 
-from config import EMBEDDING_MODEL
-
+from config import GEMINI_API_KEY
 from utils.mongo import rag_chunks_collection
 
-
 # ==========================================
-# Load Embedding Model
+# Configure Gemini
 # ==========================================
 
-model = SentenceTransformer(
-    EMBEDDING_MODEL
-)
+genai.configure(api_key=GEMINI_API_KEY)
+
+EMBEDDING_MODEL_NAME = "models/embedding-001"
 
 
 # ==========================================
 # Create One Embedding
 # ==========================================
 
-def create_embedding(text):
+def create_embedding(text, task_type="retrieval_document"):
 
     if not text or not text.strip():
         raise ValueError(
             "Text cannot be empty."
         )
 
-    embedding = model.encode(
-        text,
-        normalize_embeddings=True
+    result = genai.embed_content(
+        model=EMBEDDING_MODEL_NAME,
+        content=text,
+        task_type=task_type
     )
 
-    return embedding.tolist()
+    return result["embedding"]
 
 
 # ==========================================
 # Create Multiple Embeddings
 # ==========================================
 
-def create_embeddings(texts):
+def create_embeddings(texts, task_type="retrieval_document"):
 
     if not texts:
         return []
 
-    embeddings = model.encode(
-        texts,
-        normalize_embeddings=True
-    )
+    embeddings = []
 
-    return embeddings.tolist()
+    for text in texts:
+        result = genai.embed_content(
+            model=EMBEDDING_MODEL_NAME,
+            content=text,
+            task_type=task_type
+        )
+        embeddings.append(result["embedding"])
+
+    return embeddings
 
 
 # ==========================================
@@ -72,7 +76,7 @@ def store_chunks(
         for chunk in chunks
     ]
 
-    # Generate embeddings in one batch
+    # Generate embeddings (Gemini API doesn't batch, so we loop)
     embeddings = create_embeddings(
         texts
     )
