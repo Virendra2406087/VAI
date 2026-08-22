@@ -6,3 +6,4 @@ pypdf
 numpy
 requests
 google-genai
+python-multipart
