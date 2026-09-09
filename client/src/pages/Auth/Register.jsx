@@ -49,7 +49,7 @@ export default function Register() {
         <div style={S.fields}>
           <div style={S.field}>
             <label style={S.label}>Full Name</label>
-            <input placeholder="Virendra Kumar" value={name} onChange={e => setName(e.target.value)} style={S.input} />
+            <input placeholder="Abc..." value={name} onChange={e => setName(e.target.value)} style={S.input} />
           </div>
           <div style={S.field}>
             <label style={S.label}>Email</label>
