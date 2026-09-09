@@ -3,6 +3,7 @@ import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import axios from "axios";
 import { API_BASE_URL } from "../../config";
+import {User,Lock, Check, CircleX, Save} from "lucide-react";
 
 function Settings() {
   const [activeTab, setActiveTab] = useState("account");
@@ -58,8 +59,8 @@ function Settings() {
 
   //  Only 2 tabs: Account + Password
   const tabs = [
-    { id:"account",  icon:"👤", label:"Account"  },
-    { id:"password", icon:"🔒", label:"Password" },
+    { id:"account",  icon:<User/>, label:"Account"  },
+    { id:"password", icon:<Lock/>, label:"Password" },
   ];
 
   return (
@@ -74,8 +75,8 @@ function Settings() {
             <p style={S.pageSub}>Manage your account preferences</p>
           </div>
 
-          {success && <div style={S.successBanner}>✅ {success}</div>}
-          {error   && <div style={S.errorBanner}>❌ {error}</div>}
+          {success && <div style={S.successBanner}><Check/> {success}</div>}
+          {error   && <div style={S.errorBanner}><CircleX/> {error}</div>}
 
           <div style={S.layout}>
 
@@ -136,7 +137,7 @@ function Settings() {
                   </div>
 
                   <button style={S.saveBtn} onClick={saveAccount}>
-                    💾 Save Changes
+                    <Save/> Save Changes
                   </button>
                 </div>
               )}
@@ -179,7 +180,7 @@ function Settings() {
                             <span style={{fontSize:11,color:"#475569"}}>
                               {strength.label==="Weak"?"Use 6+ chars"
                                :strength.label==="Medium"?"Add uppercase + numbers"
-                               :"Great password! ✅"}
+                               :"Great password! "}
                             </span>
                           </div>
                         </div>
@@ -203,10 +204,10 @@ function Settings() {
                         placeholder="Repeat new password"
                       />
                       {passwords.confirm && passwords.confirm !== passwords.newPass && (
-                        <p style={{fontSize:11,color:"#fca5a5",marginTop:4}}>❌ Passwords don't match</p>
+                        <p style={{fontSize:11,color:"#fca5a5",marginTop:4}}><CircleX/> Passwords don't match</p>
                       )}
                       {passwords.confirm && passwords.confirm === passwords.newPass && (
-                        <p style={{fontSize:11,color:"#6ee7b7",marginTop:4}}>✅ Passwords match</p>
+                        <p style={{fontSize:11,color:"#6ee7b7",marginTop:4}}><Check/> Passwords match</p>
                       )}
                     </div>
 
@@ -215,7 +216,7 @@ function Settings() {
                       onClick={savePassword}
                       disabled={saving}
                     >
-                      {saving ? "Updating…" : "🔒 Update Password"}
+                      {saving ? "Updating…" : " Update Password"}
                     </button>
 
                   </div>

@@ -1,5 +1,6 @@
 const { GoogleGenAI } = require("@google/genai");
 const { saveEvent }   = require("./HistoryController");
+const HistoryEvent    = require("../models/HistoryEvent");
 const jwt             = require("jsonwebtoken");
 
 if (!process.env.GEMINI_API_KEY) {
@@ -9,7 +10,12 @@ if (!process.env.GEMINI_API_KEY) {
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // ── Model fallback chain: try each in order until one works ──
-const MODELS = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+// gemini-1.5-flash / gemini-1.5-pro were fully retired and now 404 —
+// they can't serve as fallbacks anymore. gemini-2.5-flash-lite is a
+// cheaper/faster sibling that's often available when 2.5-flash is
+// overloaded; gemini-2.5-pro is the highest-quality last resort.
+// All three are GA-stable (scheduled shutdown is Oct 16, 2026, not yet).
+const MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro"];
 
 const generateWithFallback = async (params) => {
   let lastError;
@@ -105,7 +111,10 @@ exports.askTutor = async (req, res) => {
         type:   "tutor",
         title:  `AI Tutor: ${shortQ}`,
         detail: answer.slice(0, 400),
-        meta:   { question: shortQ },
+        // Store the FULL question/answer in meta so a real conversation
+        // view can be rebuilt later — title/detail above stay short
+        // because they're also used by the generic activity feed.
+        meta:   { question, answer },
       });
     }
 
@@ -119,6 +128,33 @@ exports.askTutor = async (req, res) => {
   }
 };
 
-exports.getTutorHistory = (req, res) => {
-  res.json({ message: "History working" });
+// ── Return this user's past tutor Q&A, oldest first, ready to
+//    render straight into a chat thread if you ever want one. ──
+exports.getTutorHistory = async (req, res) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
+
+    const limit = Math.min(parseInt(req.query.limit, 10) || 100, 500);
+
+    const events = await HistoryEvent.find({ userId, type: "tutor" })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+
+    // Oldest first, so it reads top-to-bottom like a real conversation.
+    const conversation = events
+      .reverse()
+      .map(ev => ({
+        id:       ev._id,
+        question: ev.meta?.question ?? ev.title?.replace(/^AI Tutor: /, "") ?? "",
+        answer:   ev.meta?.answer   ?? ev.detail ?? "",
+        time:     ev.createdAt,
+      }));
+
+    res.json({ success: true, data: conversation, total: conversation.length });
+  } catch (error) {
+    console.error("❌ Tutor history error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 };

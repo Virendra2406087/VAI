@@ -1,28 +1,37 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import {
+  Brain,
+  Layers3,
+  CalendarCheck,
+  FileText,
+  History,
+  MessageSquare,
+  BookOpen,LayoutDashboard,User,
+  Settings,
+  LogOut,
+  Sparkle,
+  Sparkles,
+} from "lucide-react";
 
 const MENU = [
-  { to: "/dashboard", icon: "📊", label: "Dashboard" },
-  { to: "/topics", icon: "📚", label: "My Topics" },
-  { to: "/docs", icon: "📄", label: "Documentation" },
-  { to: "/flashcards", icon: "🃏", label: "Flashcards" },
-  { to: "/quiz", icon: "🧠", label: "Quizzes" },
-  { to: "/tutor", icon: <span className="vai-ai-icon">
-      ✨
-    </span>, label: "AI Tutor" },
+  { to: "/dashboard", icon: <LayoutDashboard size={20}/>, label: "Dashboard" },
+  { to: "/topics", icon: <BookOpen size={20}/>, label: "My Topics" },
+  { to: "/docs", icon:<FileText size={20}/>, label: "Documentation" },
+  { to: "/flashcards", icon: <Layers3 size={20}/>, label: "Flashcards" },
+  { to: "/quiz", icon: <Brain size={20}/>, label: "Quizzes" },
+  { to: "/tutor", icon: <Sparkles/>, label: "AI Tutor" },
 
   // NEW
-  { to: "/chat-document", icon: <span className="vai-ai-icon">
-      📄
-    </span>, label: "Chat with Document" },
+  { to: "/chat-document", icon: <MessageSquare size={20}/>, label: "Chat with Document" },
 
-  { to: "/planner", icon: "📅", label: "Study Planner" },
-  { to: "/history", icon: "🕘", label: "History" },
+  { to: "/planner", icon: <CalendarCheck size={20}/>, label: "Study Planner" },
+  { to: "/history", icon: <History size={20}/>, label: "History" },
 ];
 
 const BOTTOM = [
-  { to: "/profile", icon: "👤", label: "Profile" },
-  { to: "/settings", icon: "⚙️", label: "Settings" },
+  { to: "/profile", icon: <User />, label: "Profile" },
+  { to: "/settings", icon: <Settings/>, label: "Settings" },
 ];
 
 function Sidebar() {
@@ -407,7 +416,7 @@ function Sidebar() {
 
         {/* MAIN MENU */}
         <nav style={S.nav}>
-          <p style={S.sectionLabel}>Main Menu</p>
+          <p style={S.sectionLabel}>Menu</p>
 
           {MENU.map((item) => (
             <NavLink
@@ -479,7 +488,7 @@ function Sidebar() {
               onMouseEnter={hoverLogout}
               onMouseLeave={unhoverLogout}
             >
-              🚪 Sign Out
+              <LogOut/> Sign Out
             </button>
           )}
         </div>

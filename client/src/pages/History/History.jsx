@@ -2,7 +2,14 @@ import { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import Navbar  from "../../components/Navbar";
 import { useNavigate } from "react-router-dom";
-import { fmtTime } from "../../utils/history.js";
+import {
+  LayoutDashboard,
+  Flame,CalendarClock,
+  FileText,
+  Layers3,
+  Library,
+  Brain,
+} from "lucide-react";
 
 // ── Storage helpers ──
 const getHistoryKey = () => "vai_history_" + (localStorage.getItem("userId") || "guest");
@@ -10,13 +17,9 @@ const getAllHistory  = () => { try { return JSON.parse(localStorage.getItem(getH
 const toDateKey     = (d) => { const x = new Date(d); x.setHours(0,0,0,0); return x.toDateString(); };
 const toDateStr     = (d) => { const x = new Date(d); x.setHours(0,0,0,0); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`; };
 
-// ── Extract clean topic from a history event ──
-// trackDoc      → title="📄 Documentation: C++"   detail="C++"        ← detail IS topic
-// trackFlashcard→ title="🃏 Flashcards: C++"       detail="20 cards generated"  ← title has topic
-// trackQuiz     → title="🧠 Quiz: C++"             detail="10 questions generated" ← title has topic
-// trackTopic    → title="📚 New Topic: C++"        detail="C++"
-// trackTutor    → title="🤖 AI Chat: question…"    detail=answer
 const extractTopic = (event) => {
+  if (event.topic && event.topic.trim()) return event.topic.trim();
+
   switch (event.type) {
     case "doc":
       return (event.detail || "").trim();
@@ -27,9 +30,7 @@ const extractTopic = (event) => {
     case "topic":
       return (event.detail || (event.title || "").replace("📚 New Topic: ", "") || "").trim();
     case "tutor":
-      return (event.title || "").replace(<span className="vai-ai-icon">
-      ✨
-    </span> , "").trim();
+      return (event.title || "").replace(/^[^\w]*AI Chat:\s*/i, "").trim();
     case "task":
       return (event.title || "").replace("✅ Task: ", "").trim();
     default:
@@ -49,14 +50,12 @@ const hasFlashCache = (t) => { try { return !!(JSON.parse(localStorage.getItem(f
 const hasQuizCache  = (t) => { try { return !!(JSON.parse(localStorage.getItem(quizCacheKey(t)))?.questions?.length); } catch { return false; } };
 
 const TYPE_CFG = {
-  doc:       { icon:"📄", label:"Documentation", color:"#6366f1", btn:"Open Docs"       },
-  flashcard: { icon:"🃏", label:"Flashcards",    color:"#a855f7", btn:"Open Flashcards" },
-  quiz:      { icon:"🧠", label:"Quiz",           color:"#3b82f6", btn:"Open Quiz"       },
-  topic:     { icon:"📚", label:"Topic",          color:"#10b981", btn:"View Topics"     },
-  tutor:     { icon:<span className="vai-ai-icon">
-      ✨
-    </span> , label:"VAI Tutor",       color:"#f59e0b", btn:"Open Tutor"      },
-  task:      { icon:"📚", label:"Task",           color:"#ec4899", btn:null              },
+  doc:       { icon: <FileText size={20} />, label: "Documentation", color: "#6366f1", btn: "Open Docs" },
+  flashcard: { icon: <Layers3 size={20} />, label: "Flashcards", color: "#a855f7", btn: "Open Flashcards" },
+  quiz:      { icon: <Brain size={20} />, label: "Quiz", color: "#3b82f6", btn: "Open Quiz" },
+  topic:     { icon: <Library size={20} />, label: "Topic", color: "#10b981", btn: "View Topics" },
+  tutor:     { icon: <span className="vai-ai-icon">✨</span>, label: "VAI Tutor", color: "#f59e0b", btn: "Open Tutor" },
+  task:      { icon: <Library size={20} />, label: "Task", color: "#ec4899", btn: null },
 };
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -102,15 +101,11 @@ export default function History() {
       });
 
     } else if (event.type === "flashcard") {
-      //  Flashcards.jsx loads cache on mount using topic key
-      // Pass topic correctly — extracted from title not detail
       navigate("/flashcards/view", {
         state: { topic, autoGenerate: false }
       });
 
     } else if (event.type === "quiz") {
-      //  Quiz.jsx loads cache on mount using topic key
-      // Pass topic correctly — extracted from title not detail
       navigate("/quiz/view", {
         state: { topic, autoGenerate: false }
       });
@@ -119,7 +114,14 @@ export default function History() {
       navigate("/topics");
 
     } else if (event.type === "tutor") {
-      navigate("/tutor");
+      navigate("/tutor", {
+        state: {
+          fromHistory: true,
+          exchanges: (event.exchanges && event.exchanges.length > 0)
+            ? event.exchanges
+            : [{ q: topic, a: event.detail || "" }],   // fallback for old entries saved before this fix
+        }
+      });
     }
   };
 
@@ -164,7 +166,7 @@ export default function History() {
           {/* HEADER */}
           <div style={S.header}>
             <div>
-              <h1 style={S.title}>🕘 Activity History</h1>
+              <h1 style={S.title}><CalendarClock/> Activity History</h1>
               <p style={S.sub}>View your learning activity by date</p>
             </div>
             <div style={S.stats}>
@@ -217,8 +219,8 @@ export default function History() {
                 <div style={S.legendItem}><div style={{...S.legendDot,background:"linear-gradient(135deg,#7c3aed,#a855f7)"}}/><span>Selected</span></div>
               </div>
               <div style={S.monthSummary}>
-                <div style={S.monthRow}><span style={{color:"#64748b",fontSize:13}}>📅 Active days</span><span style={{color:"#a855f7",fontWeight:700}}>{monthActive}</span></div>
-                <div style={S.monthRow}><span style={{color:"#64748b",fontSize:13}}>📊 Total events</span><span style={{color:"#22c55e",fontWeight:700}}>{monthTotal}</span></div>
+                <div style={S.monthRow}><span style={{color:"#64748b",fontSize:13}}><Flame/> Active days</span><span style={{color:"#a855f7",fontWeight:700}}>{monthActive}</span></div>
+                <div style={S.monthRow}><span style={{color:"#64748b",fontSize:13}}><LayoutDashboard size={20} /> Total events</span><span style={{color:"#22c55e",fontWeight:700}}>{monthTotal}</span></div>
               </div>
 
               {/* Type breakdown */}
@@ -303,7 +305,6 @@ export default function History() {
                     const cfg   = TYPE_CFG[event.type]||{icon:"📌",label:event.type,color:"#64748b",btn:null};
                     const topic = extractTopic(event);
 
-                    // Check cache for this exact topic string
                     const isCached =
                       event.type==="doc"       ? hasDocCache(topic)   :
                       event.type==="flashcard" ? hasFlashCache(topic) :
@@ -334,7 +335,6 @@ export default function History() {
                             <span style={{fontSize:11,fontWeight:700,padding:"2px 9px",borderRadius:100,background:`${cfg.color}18`,color:cfg.color,border:`1px solid ${cfg.color}30`}}>
                               {cfg.label}
                             </span>
-                            
                           </div>
 
                           {/* Topic — main title */}
@@ -344,14 +344,14 @@ export default function History() {
 
                           {/* Sub detail */}
                           {event.type==="flashcard"&&event.detail&&(
-                            <p style={{fontSize:12,color:"#64748b",margin:"3px 0 0"}}>🃏 {event.detail}</p>
+                            <p style={{fontSize:12,color:"#64748b",margin:"3px 0 0"}}><Layers3/> {event.detail}</p>
                           )}
                           {event.type==="quiz"&&event.detail&&(
-                            <p style={{fontSize:12,color:"#64748b",margin:"3px 0 0"}}>🧠 {event.detail}</p>
+                            <p style={{fontSize:12,color:"#64748b",margin:"3px 0 0"}}><Brain/> {event.detail}</p>
                           )}
                           {event.type==="doc"&&event.detail&&event.detail!==topic&&(
                             <p style={{fontSize:12,color:"#64748b",margin:"3px 0 0",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                              📄 {event.detail}
+                              <FileText/> {event.detail}
                             </p>
                           )}
                           {event.type==="tutor"&&event.detail&&(

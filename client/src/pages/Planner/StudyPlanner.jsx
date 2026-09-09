@@ -2,6 +2,7 @@ import { trackTask } from "../../utils/history";
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
+import { FileText, Target,CircleCheckBig ,CalendarDays, Flame,Plus } from "lucide-react";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAYS   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -136,28 +137,28 @@ function StudyPlanner() {
           {/* ── TOP STATS ── */}
           <div style={S.statsRow}>
             <div style={S.statCard}>
-              <span style={S.statIcon}>🔥</span>
+              <span style={S.statIcon}><Flame size = {40} /></span>
               <div>
                 <div style={S.statVal}>{streak}</div>
                 <div style={S.statLbl}>Day Streak</div>
               </div>
             </div>
             <div style={S.statCard}>
-              <span style={S.statIcon}>📅</span>
+              <span style={S.statIcon}><CalendarDays/></span>
               <div>
                 <div style={S.statVal}>{monthTotal}</div>
                 <div style={S.statLbl}>Tasks This Month</div>
               </div>
             </div>
             <div style={S.statCard}>
-              <span style={S.statIcon}>✅</span>
+              <span style={S.statIcon}><CircleCheckBig /></span>
               <div>
                 <div style={S.statVal}>{monthDone}</div>
                 <div style={S.statLbl}>Completed</div>
               </div>
             </div>
             <div style={S.statCard}>
-              <span style={S.statIcon}>🎯</span>
+              <span style={S.statIcon}><Target/></span>
               <div>
                 <div style={S.statVal}>{monthTotal ? Math.round((monthDone/monthTotal)*100) : 0}%</div>
                 <div style={S.statLbl}>Accuracy</div>
@@ -306,7 +307,7 @@ function StudyPlanner() {
                       <option value="high">🔴 High</option>
                     </select>
                     <button style={S.addBtn} onClick={addTask} disabled={!taskInput.trim()}>
-                      + Add
+                      <Plus size = {20}/> Add
                     </button>
                   </div>
                 </div>
@@ -330,7 +331,7 @@ function StudyPlanner() {
                 {filtered.length === 0 ? (
                   <div style={S.emptyTasks}>
                     <div style={{ fontSize:36, marginBottom:12 }}>
-                      {isPast ? "🔒" : dayTasks.length === 0 ? "📝" : "🎉"}
+                      {isPast ? "🔒" : dayTasks.length === 0 ? <FileText size = {60} /> : "🎉"}
                     </div>
                     <p style={{ color:"#64748b", fontSize:14 }}>
                       {isPast ? "No tasks were scheduled for this date"
@@ -417,7 +418,7 @@ const S = {
   addRow:      { display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" },
   colorRow:    { display:"flex", gap:6 },
   colorDot:    { width:20, height:20, borderRadius:"50%", cursor:"pointer", transition:"transform 0.2s", flexShrink:0 },
-  select:      { padding:"7px 10px", borderRadius:7, border:"1px solid rgba(255,255,255,0.08)", background:"rgba(255,255,255,0.06)", color:"#e2e8f0", fontSize:13, outline:"none", cursor:"pointer" },
+  select:      { padding:"7px 10px", borderRadius:7, border:"1px solid rgba(255,255,255,0.08)", background:"rgba(255,255,255,0.06)", color:"#34885b", fontSize:13, outline:"none", cursor:"pointer" },
   addBtn:      { padding:"8px 20px", borderRadius:8, background:"linear-gradient(135deg,#7c3aed,#a855f7)", border:"none", color:"white", fontSize:13, fontWeight:700, cursor:"pointer", boxShadow:"0 4px 14px rgba(124,58,237,0.35)", marginLeft:"auto", fontFamily:"sans-serif" },
 
   // Filter

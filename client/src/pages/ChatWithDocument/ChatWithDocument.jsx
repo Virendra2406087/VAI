@@ -130,7 +130,7 @@ const ChatWithDocument = () => {
 
           {error && (
             <div className="document-error">
-              ⚠️ {error}
+              <TriangleAlert /> {error}
             </div>
           )}
 
@@ -142,28 +142,9 @@ const ChatWithDocument = () => {
       </div>
 
       <style>{`
-        /*
-          IMPORTANT: this component is rendered *inside* your existing
-          layout (Sidebar + Navbar already occupy their own space above
-          and to the left). It must fill only the space its parent gives
-          it - NOT the full browser viewport - or it will visually sit
-          on top of the Sidebar/Navbar.
-
-          If this still overlaps after the fix below, check the parent
-          layout wrapper (e.g. DashboardLayout.jsx) and make sure the
-          element wrapping <Outlet /> / page content uses something like:
-
-            display: flex; flex-direction: column; flex: 1; min-height: 0;
-
-          so this component has a real, bounded height to fill with
-          height: 100% rather than inventing its own via 100vh.
-        */
+        
         .document-chat-page {
           width: 100%;
-
-          /* Navbar.jsx renders at height: 68 - subtract it so this
-             fills exactly the remaining viewport instead of adding
-             its own extra 100vh on top of Navbar's height. */
           height: calc(100vh - 68px);
           flex: 1;
           min-height: 0;

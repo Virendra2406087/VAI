@@ -1,21 +1,46 @@
 const KEY = "app_notifications";
 
+// Ensures every notification object has the fields Navbar expects,
+// so a malformed/old localStorage entry can never crash the render.
+const sanitize = (notifs) => {
+  if (!Array.isArray(notifs)) return [];
+  return notifs
+    .filter(n => n && typeof n === "object")
+    .map(n => ({
+      id:     n.id ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      icon:   typeof n.icon === "string" ? n.icon : "🔔",
+      text:   typeof n.text === "string" ? n.text : "Notification",
+      type:   typeof n.type === "string" ? n.type : "info",
+      time:   n.time && !isNaN(new Date(n.time).getTime())
+                ? n.time
+                : new Date().toISOString(),
+      unread: !!n.unread,
+    }));
+};
+
 export const getNotifications = () => {
   try {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
-  } catch { return []; }
+    const raw = JSON.parse(localStorage.getItem(KEY) || "[]");
+    return sanitize(raw);
+  } catch {
+    return [];
+  }
 };
 
 // Save notifications
 export const saveNotifications = (notifs) => {
-  localStorage.setItem(KEY, JSON.stringify(notifs));
+  try {
+    localStorage.setItem(KEY, JSON.stringify(sanitize(notifs)));
+  } catch {
+    // localStorage full or unavailable — fail silently rather than crash
+  }
 };
 
 // Add a new notification
 export const addNotification = (icon, text, type = "info") => {
   const notifs = getNotifications();
   const newNotif = {
-    id:     Date.now(),
+    id:     `${Date.now()}-${Math.random().toString(36).slice(2)}`,
     icon,
     text,
     type,
@@ -52,12 +77,15 @@ export const clearNotifications = () => {
   window.dispatchEvent(new Event("notificationsUpdated"));
 };
 
-// Format time ago
+// Format time ago — guards against invalid/missing dates
 export const timeAgo = (isoString) => {
-  const diff = Date.now() - new Date(isoString).getTime();
+  const time = new Date(isoString).getTime();
+  if (isNaN(time)) return "just now";
+
+  const diff = Date.now() - time;
   const s = Math.floor(diff / 1000);
-  if (s < 60)   return `${s}s ago`;
-  if (s < 3600) return `${Math.floor(s/60)}m ago`;
-  if (s < 86400)return `${Math.floor(s/3600)}h ago`;
-  return         `${Math.floor(s/86400)}d ago`;
+  if (s < 60)    return `${s}s ago`;
+  if (s < 3600)  return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return           `${Math.floor(s / 86400)}d ago`;
 };

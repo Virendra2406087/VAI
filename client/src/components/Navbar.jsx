@@ -9,34 +9,47 @@ import {
   timeAgo,
 } from "../utils/notifications";
 
+import {
+  LayoutDashboard,
+  Layers3,
+  FileText,
+  Trophy,Brain,
+  BookOpen,
+  CalendarClock,
+  LogOut,
+  Bell,
+  Settings,
+  User,
+  History,
+  Zap,
+  Sparkles
+} from "lucide-react";
 
 
 const PAGE_TITLES = {
-  "/dashboard":       { title: "Dashboard",     icon: "📊" },
-  "/topics":          { title: "My Topics",     icon: "📚" },
-  "/docs":            { title: "Documentation", icon: "📄" },
-  "/docs/view":       { title: "Documentation", icon: "📄" },
-  "/flashcards":      { title: "Flashcards",    icon: "🃏" },
-  "/flashcards/view": { title: "Flashcards",    icon: "🃏" },
-  "/quiz":            { title: "Quizzes",       icon: "🧠" },
-  "/quiz/view":       { title: "Quizzes",       icon: "🧠" },
-  "/tutor":           { title: "AI Tutor",      icon: <span className="vai-ai-icon">
-      ✨
-    </span> },
+  "/dashboard":       { title: "Dashboard",     icon: <LayoutDashboard size={20} /> },
+  "/topics":          { title: "My Topics",     icon: <BookOpen size={20}/>},
+  "/docs":            { title: "Documentation", icon: <FileText size={20}/> },
+  "/docs/view":       { title: "Documentation", icon: <FileText size={20}/>},
+  "/flashcards":      { title: "Flashcards",    icon: <Layers3 size={20}/> },
+  "/flashcards/view": { title: "Flashcards",    icon: <Layers3 size={20}/> },
+  "/quiz":            { title: "Quizzes",       icon: <Brain size={20}/>},
+  "/quiz/view":       { title: "Quizzes",       icon: <Brain size={20}/> },
+  "/tutor":           { title: "AI Tutor",      icon: <Sparkles/> },
     "/chat-document": { title: "Chat with Document", icon: <span className="vai-ai-icon">
-      📄
+      <FileText size={20}/>
     </span>  },
-  "/planner":         { title: "Study Planner", icon: "📅" },
-  "/profile":         { title: "Profile",       icon: "👤" },
-  "/settings":        { title: "Settings",      icon: "⚙️" },
-  "/history":         { title: "History",       icon: "🕘" },
+  "/planner":         { title: "Study Planner", icon: <CalendarClock/> },
+  "/profile":         { title: "Profile",       icon: <User/> },
+  "/settings":        { title: "Settings",      icon: <Settings/> },
+  "/history":         { title: "History",       icon: <History size = {20}/> },
 };
 
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const name   = localStorage.getItem("name")   || "User";
+  const name   = localStorage.getItem("name")   || "User1";
   const email  = localStorage.getItem("email")  || "";
   const avatar = localStorage.getItem("avatar") || "";
 
@@ -59,7 +72,7 @@ function Navbar() {
   const notifRef   = useRef(null);
   const profileRef = useRef(null);
 
-  const page   = PAGE_TITLES[location.pathname] || { title: "VAI", icon: "⚡" };
+  const page   = PAGE_TITLES[location.pathname] || { title: "VAI", icon: <Zap size={20}/> };
   const isDark = theme === "dark";
 
 useEffect(() => {
@@ -622,7 +635,7 @@ useEffect(() => {
             onMouseLeave={unhoverIconBtn}
             onClick={() => { setShowNotifs(v => !v); setShowProfile(false); }}
           >
-            🔔
+            <Bell color="yellow"/>
             {unreadCount > 0 && <span style={S.badge}>{unreadCount}</span>}
           </button>
 
@@ -655,7 +668,7 @@ useEffect(() => {
               <div style={S.notifList}>
                 {notifs.length === 0 ? (
                   <div style={S.emptyNotif}>
-                    <span style={{ fontSize: 32 }}>🔔</span>
+                    <span style={{ fontSize: 32 }}><Bell color="yellow"/></span>
                     <p style={{ color: isDark ? "#475569" : "#7c6fa0", fontSize: 13, marginTop: 8 }}>
                       No notifications yet
                     </p>
@@ -723,9 +736,9 @@ useEffect(() => {
               <div style={S.divider} />
 
               {[
-                { icon: "👤", label: "My Profile",  path: "/profile"   },
-                { icon: "⚙️", label: "Settings",    path: "/settings"  },
-                { icon: "📊", label: "Dashboard",   path: "/dashboard" },
+                { icon: <User/>, label: "My Profile",  path: "/profile"   },
+                { icon: <Settings/>, label: "Settings",    path: "/settings"  },
+                { icon: <LayoutDashboard size={20} />, label: "Dashboard",   path: "/dashboard" },
               ].map(item => (
                 <button
                   key={item.path}
@@ -746,7 +759,7 @@ useEffect(() => {
                 onMouseEnter={hoverDanger}
                 onMouseLeave={unhoverDanger}
               >
-                <span>🚪</span> Sign Out
+                <span><LogOut/></span> Sign Out
               </button>
             </div>
           )}

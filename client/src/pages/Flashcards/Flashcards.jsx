@@ -6,6 +6,7 @@ import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import { triggerRateLimitToast } from "../../utils/rateLimitToast";
 import { API_BASE_URL } from "../../config";
+import { CircleCheck, CircleX, FileText, Flame, Layers3, Zap } from "lucide-react";
 
 
 // ── Cache helpers ──
@@ -155,13 +156,13 @@ function Flashcards() {
                 <div className="progress-fill" style={{ width:`${progress}%` }} />
               </div>
               <div className="difficulty-stats">
-                <span style={{ color:"green" }}>✅ Easy: {easy}</span>
-                <span style={{ color:"orange" }}>⚡ Medium: {medium}</span>
-                <span style={{ color:"red" }}>🔥 Hard: {hard}</span>
+                <span style={{ color:"green" }}><CircleCheck size={20}/> Easy: {easy}</span>
+                <span style={{ color:"orange" }}><Zap size={20}/> Medium: {medium}</span>
+                <span style={{ color:"red" }}><Flame  size={20}/> Hard: {hard}</span>
               </div>
             </div>
 
-            {error && <div style={{ color:"red", padding:"8px" }}>❌ {error}</div>}
+            {error && <div style={{ color:"red", padding:"8px" }}><CircleX size={20}/> {error}</div>}
 
             {cards.length > 0 && currentCard ? (
               <>
@@ -184,9 +185,9 @@ function Flashcards() {
                 <p className="flip-hint">Click card to flip</p>
 
                 <div className="difficulty-buttons">
-                  <button className="diff-btn easy"   onClick={() => markDifficulty("easy")}>✅ Easy</button>
-                  <button className="diff-btn medium" onClick={() => markDifficulty("medium")}>⚡ Medium</button>
-                  <button className="diff-btn hard"   onClick={() => markDifficulty("hard")}>🔥 Hard</button>
+                  <button className="diff-btn easy"   onClick={() => markDifficulty("easy")}><CircleCheck/> Easy</button>
+                  <button className="diff-btn medium" onClick={() => markDifficulty("medium")}><Zap/> Medium</button>
+                  <button className="diff-btn hard"   onClick={() => markDifficulty("hard")}><Zap/> Hard</button>
                 </div>
 
                 <div className="flash-nav">
@@ -199,7 +200,7 @@ function Flashcards() {
                 {index === cards.length - 1 && (
                   <div style={{ marginTop:20, padding:"18px 22px", background:"linear-gradient(135deg,rgba(124,58,237,0.1),rgba(99,102,241,0.08))", border:"1px solid rgba(124,58,237,0.25)", borderRadius:14, display:"flex", justifyContent:"space-between", alignItems:"center", gap:16, flexWrap:"wrap" }}>
                     <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                      <span style={{ fontSize:24 }}>🃏</span>
+                      <span style={{ fontSize:24 }}><Layers3/></span>
                       <div>
                         <p style={{ fontSize:14, fontWeight:700, color:"#f1f5f9", margin:0 }}>You reached the last card!</p>
                         <p style={{ fontSize:12, color:"#64748b", marginTop:3 }}>
@@ -208,14 +209,58 @@ function Flashcards() {
                       </div>
                     </div>
                     <div style={{ display:"flex", gap:8 }}>
-                      <button onClick={() => generateAI(true)} disabled={loading}
-                        style={{ padding:"10px 20px", borderRadius:9, background:"linear-gradient(135deg,#7c3aed,#a855f7)", border:"none", color:"white", fontSize:13, fontWeight:700, cursor:"pointer", boxShadow:"0 4px 16px rgba(124,58,237,0.35)", fontFamily:"sans-serif" }}>
-                        {loading ? "Generating…" : "✨ Generate More Cards"}
-                      </button>
-                      <button onClick={() => { setIndex(0); setFlipped(false); }}
-                        style={{ padding:"10px 16px", borderRadius:9, border:"1px solid rgba(255,255,255,0.1)", background:"rgba(255,255,255,0.05)", color:"#94a3b8", fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:"sans-serif" }}>
-                        ↺ Restart
-                      </button>
+                      <button
+  onClick={() => generateAI(true)}
+  disabled={loading}
+  style={{
+    padding: "10px 20px",
+    borderRadius: 9,
+    background: "linear-gradient(135deg,#7c3aed,#a855f7)",
+    border: "none",
+    color: "white",
+    fontSize: 13,
+    fontWeight: 700,
+    cursor: "pointer",
+    boxShadow: "0 4px 16px rgba(124,58,237,0.35)",
+    fontFamily: "sans-serif",
+    display: "flex",
+    alignItems: "center",
+    gap: 8
+  }}
+>
+  {loading ? (
+    "Generating…"
+  ) : (
+    <>
+      <Sparkles size={17} />
+      Generate More Cards
+    </>
+  )}
+</button>
+
+<button
+  onClick={() => {
+    setIndex(0);
+    setFlipped(false);
+  }}
+  style={{
+    padding: "10px 16px",
+    borderRadius: 9,
+    border: "1px solid rgba(255,255,255,0.1)",
+    background: "rgba(255,255,255,0.05)",
+    color: "#94a3b8",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "sans-serif",
+    display: "flex",
+    alignItems: "center",
+    gap: 8
+  }}
+>
+  <RotateCcw size={16} />
+  Restart
+</button>
                     </div>
                   </div>
                 )}

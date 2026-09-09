@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
+import {FileText,BookOpen,Sparkles,FileUp ,Lightbulb,Play,Check,X  } from "lucide-react";
 
 function DocumentationHome() {
   const navigate   = useNavigate();
@@ -45,7 +46,7 @@ function DocumentationHome() {
         <div style={S.page}>
 
           <div style={S.header}>
-            <h1 style={S.title}>📄 Documentation</h1>
+            <h1 style={S.title}><FileText size={20}/> Documentation</h1>
             <p style={S.sub}>Upload a file or enter a topic to generate AI-powered documentation</p>
           </div>
 
@@ -66,27 +67,27 @@ function DocumentationHome() {
                   /* File selected state */
                   <div style={S.filePreview}>
                     <div style={S.fileIconWrap}>
-                      <span style={{ fontSize:36 }}>{file.type === "application/pdf" ? "📕" : "📝"}</span>
+                      <span style={{ fontSize:36 }}>{file.type === "application/pdf" ? "📕" : <FileUp  size={20}/>}</span>
                     </div>
                     <div style={S.fileDetails}>
                       <p style={S.fileName}>{file.name}</p>
                       <p style={S.fileMeta}>{(file.size/1024).toFixed(1)} KB · {file.type === "application/pdf" ? "PDF Document" : "Text File"}</p>
                       <div style={S.fileBar}><div style={{ ...S.fileBarFill, width:"100%" }} /></div>
-                      <p style={S.fileReady}>✅ File ready — topic auto-detected</p>
+                      <p style={S.fileReady}><Check  size={20}/> File ready — topic auto-detected</p>
                     </div>
                     <button style={S.removeFile} onClick={(e) => { e.stopPropagation(); removeFile(); }}>✕</button>
                   </div>
                 ) : dragging ? (
                   /* Dragging state */
                   <div style={S.dropContent}>
-                    <div style={S.dropIconActive}>📂</div>
+                    <div style={S.dropIconActive}><FileUp  size={20}/></div>
                     <p style={{ color:"#a855f7", fontSize:16, fontWeight:700 }}>Drop your file here!</p>
                   </div>
                 ) : (
                   /* Default state */
                   <div style={S.dropContent}>
                     <div style={S.uploadIcon}>
-                      <span style={{ fontSize:40 }}>☁️</span>
+                      <span style={{ fontSize:40 }}><FileUp  size={40}/></span>
                     </div>
                     <p style={S.dropTitle}>Drag & drop your file here</p>
                     <p style={S.dropSub}>or click to browse files</p>
@@ -118,7 +119,7 @@ function DocumentationHome() {
                 />
               </div>
 
-              {error && <div style={S.errorBanner}>❌ {error}</div>}
+              {error && <div style={S.errorBanner}><X size={20}/> {error}</div>}
 
               {/* GENERATE BUTTON */}
               <button
@@ -126,7 +127,7 @@ function DocumentationHome() {
                 onClick={generate}
                 disabled={!topic.trim()}
               >
-                <span>✨</span>
+                <span><Sparkles size={20}/></span>
                 Generate Documentation
                 <span>→</span>
               </button>
@@ -138,7 +139,7 @@ function DocumentationHome() {
 
               {/* Quick topics */}
               <div style={S.sideCard}>
-                <h3 style={S.sideTitle}>⚡ Quick Start</h3>
+                <h3 style={S.sideTitle}><Play  size={20}/> Quick Start</h3>
                 <p style={S.sideSub}>Pick a topic to start instantly</p>
                 <div style={S.quickGrid}>
                   {QUICK.map(t => (
@@ -151,12 +152,12 @@ function DocumentationHome() {
 
               {/* How it works */}
               <div style={S.sideCard}>
-                <h3 style={S.sideTitle}>💡 How it works</h3>
+                <h3 style={S.sideTitle}><Lightbulb  size={20}/> How it works</h3>
                 <div style={S.steps}>
                   {[
-                    { n:"01", icon:"📂", t:"Upload file",     d:"PDF or TXT — AI reads the content" },
-                    { n:"02", icon:"🧠", t:"AI generates",     d:"Structured docs with examples"     },
-                    { n:"03", icon:"📖", t:"Study & export",   d:"Export as PDF or bookmark sections" },
+                    { n:"01", icon:<FileUp  size={20}/>, t:"Upload file",     d:"PDF or TXT — AI reads the content" },
+                    { n:"02", icon:<Sparkles size={20}/>, t:"AI generates",     d:"Structured docs with examples"     },
+                    { n:"03", icon:<BookOpen size={20}/>, t:"Study & export",   d:"Export as PDF or bookmark sections" },
                   ].map(s => (
                     <div key={s.n} style={S.step}>
                       <div style={S.stepNum}>{s.n}</div>

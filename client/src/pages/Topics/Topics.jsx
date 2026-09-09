@@ -5,6 +5,7 @@ import { trackTopic } from "../../utils/history";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import { API_BASE_URL } from "../../config";
+import {BookOpen,FileText,Trophy,Brain,Layers3} from "lucide-react";
 
 const COLORS = ["#7c3aed","#6366f1","#a855f7","#3b82f6","#8b5cf6","#9333ea"];
 const getColor = (i) => COLORS[i % COLORS.length];
@@ -52,7 +53,7 @@ function Topics() {
       const data = await res.json();
       if (data.success) {
         setShowModal(false); setNewTitle(""); setNewDesc(""); fetchTopics();
-        addNotification("📚", `New topic created: "${newTitle.trim()}"`, "topic");
+        addNotification(<BookOpen size={20}/>, `New topic created: "${newTitle.trim()}"`, "topic");
         trackTopic(newTitle.trim());
       }
       else { setError(data.message); }
@@ -102,7 +103,7 @@ function Topics() {
 
           ) : filtered.length === 0 ? (
             <div style={S.emptyBox}>
-              <div style={S.emptyIcon}>📚</div>
+              <div style={S.emptyIcon}><BookOpen size={20}/></div>
               <h3 style={{ color:"#f1f5f9", fontSize:20, fontWeight:700, marginBottom:8 }}>
                 {search ? "No topics found" : "No topics yet"}
               </h3>
@@ -160,9 +161,9 @@ function Topics() {
                     </div>
 
                     <div style={{ display:"flex", gap:8 }}>
-                      <button style={{ ...S.actionBtn, background:`linear-gradient(135deg,${color},${color}cc)` }} onClick={() => navigate("/docs/view",       { state:{ topic: topic.title, autoGenerate: true } })}>📄 Docs</button>
-                      <button style={S.ghostBtn}                                                                  onClick={() => navigate("/flashcards/view", { state:{ topic: topic.title, autoGenerate: true } })}>🃏 Cards</button>
-                      <button style={S.ghostBtn}                                                                  onClick={() => navigate("/quiz/view",       { state:{ topic: topic.title, autoGenerate: true } })}>🧠 Quiz</button>
+                      <button style={{ ...S.actionBtn, background:`linear-gradient(135deg,${color},${color}cc)` }} onClick={() => navigate("/docs/view",       { state:{ topic: topic.title, autoGenerate: true } })}><FileText size={20}/> Docs</button>
+                      <button style={S.ghostBtn}                                                                  onClick={() => navigate("/flashcards/view", { state:{ topic: topic.title, autoGenerate: true } })}><Layers3 size={20}/> Cards</button>
+                      <button style={S.ghostBtn}                                                                  onClick={() => navigate("/quiz/view",       { state:{ topic: topic.title, autoGenerate: true } })}><Brain size={20}/> Quiz</button>
                     </div>
                   </div>
                 );

@@ -1,5 +1,27 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Sparkles,
+  Trophy,Brain,
+  Layers3,
+  CalendarCheck,
+  TrendingUp ,
+  NotebookPen,
+} from "lucide-react";
+import { Activity } from "react";
+
+// Builds an SVG polyline point-string from a series of 0–100 values,
+// used only for the static "Learning progress" sparkline mockup below.
+const buildSparkline = (values, width = 280, height = 100, padding = 10) => {
+  const step = (width - padding * 2) / (values.length - 1);
+  return values
+    .map((v, i) => {
+      const x = padding + i * step;
+      const y = height - padding - (v / 100) * (height - padding * 2);
+      return `${x},${y}`;
+    })
+    .join(" ");
+};
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -26,13 +48,27 @@ export default function LandingPage() {
   }, []);
 
   const features = [
-    { icon: "📄", title: "AI Documentation", desc: "Generate rich, structured docs for any topic instantly with Gemini AI.", color: "#7c3aed" },
-    { icon: "🃏", title: "Smart Flashcards", desc: "Auto-create flip cards with difficulty ratings to accelerate retention.", color: "#6366f1" },
-    { icon: "🧠", title: "Adaptive Quiz", desc: "AI-crafted quizzes with explanations that adapt to your knowledge gaps.", color: "#8b5cf6" },
-    { icon: "🤖", title: "AI Tutor Chat", desc: "Ask anything. Get instant expert answers with code-highlighted responses.", color: "#a855f7" },
-    { icon: "📅", title: "Study Planner", desc: "Stay on track with intelligent scheduling and streak tracking.", color: "#9333ea" },
-    { icon: "📊", title: "Progress Analytics", desc: "Visualise your learning journey with real-time charts and insights.", color: "#7e22ce" },
+    { icon: <NotebookPen size={20}/>, title: "AI Documentation", desc: "Generate rich, structured docs for any topic instantly with Gemini AI.", color: "#7c3aed" },
+    { icon: <Layers3 size={20}/>, title: "Smart Flashcards", desc: "Auto-create flip cards with difficulty ratings to accelerate retention.", color: "#6366f1" },
+    { icon: <Brain size={20}/>, title: "Adaptive Quiz", desc: "AI-crafted quizzes with explanations that adapt to your knowledge gaps.", color: "#8b5cf6" },
+    { icon: <Sparkles size={20}/>, title: "AI Tutor Chat", desc: "Ask anything. Get instant expert answers with code-highlighted responses.", color: "#a855f7" },
+    { icon: <CalendarCheck size={20}/>, title: "Study Planner", desc: "Stay on track with intelligent scheduling and streak tracking.", color: "#9333ea" },
+    { icon: <TrendingUp  size={20}/>, title: "Progress Analytics", desc: "Visualise your learning journey with real-time charts and insights.", color: "#7e22ce" },
   ];
+
+  // Mock data for the "Live preview" section — a static stand-in for what
+  // a real Dashboard.jsx looks like once a learner has some history.
+  const previewStats = [
+    { label: "Day Streak",     value: "12 🔥", color: "#f59e0b" },
+    { label: "Topics Created", value: "8",     color: "#6366f1" },
+    { label: "Flashcard Decks",value: "5",     color: "#a855f7" },
+    { label: "Quiz Accuracy",  value: "92%",   color: "#22c55e" },
+  ];
+  const previewWeekly = [
+    { day: "Mon", count: 2 }, { day: "Tue", count: 4 }, { day: "Wed", count: 3 },
+    { day: "Thu", count: 5 }, { day: "Fri", count: 6 }, { day: "Sat", count: 3 }, { day: "Sun", count: 5 },
+  ];
+  const progressPoints = buildSparkline([12, 28, 34, 50, 61, 74, 90]);
 
   return (
     <div style={S.root}>
@@ -106,7 +142,6 @@ export default function LandingPage() {
           fontSize: isMobile ? "clamp(40px, 11vw, 56px)" : "clamp(48px, 7vw, 88px)",
         }}>
           Learn Anything.<br />
-          <span style={S.heroGradient}>10× Faster.</span>
         </h1>
 
         <p style={{
@@ -151,9 +186,9 @@ export default function LandingPage() {
           maxWidth: isMobile ? 320 : "none",
         }}>
           {[
-            { icon: "📄", title: "VAI Documentation", sub: "Generated for Binary Trees", check: "✓", checkColor: "#a855f7" },
-            { icon: "🃏", title: "12 Flashcards", sub: "Ready to study", check: "✓", checkColor: "#a855f7" },
-            { icon: "🧠", title: "Quiz: 87%", sub: "Personal best!", check: "↑", checkColor: "#10b981" },
+            { icon: <NotebookPen size={20}/>, title: "VAI Documentation", sub: "Generated for Binary Trees", check: "✓", checkColor: "#a855f7" },
+            { icon: <Layers3 size={20}/>, title: "12 Flashcards", sub: "Ready to study", check: "✓", checkColor: "#a855f7" },
+            { icon: <Brain size={20}/>, title: "Quiz: 87%", sub: "Personal best!", check: "↑", checkColor: "#10b981" },
           ].map((card, i) => (
             <div key={i} style={{
               ...S.floatCard,
@@ -170,6 +205,79 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+      <section id="preview" style={{
+        ...S.section,
+        padding: isMobile ? "50px 20px 70px" : "70px 60px 110px",
+      }}>
+        <div style={S.sectionTag}>Live preview</div>
+        <h2 style={{
+          ...S.sectionTitle,
+          fontSize: isMobile ? "clamp(26px, 7vw, 36px)" : "clamp(32px, 4vw, 48px)",
+        }}>
+           Dashboard
+        </h2>
+        <p style={{
+          ...S.sectionSub,
+          fontSize: isMobile ? "14px" : "17px",
+        }}>
+          Streaks, decks, quiz scores, and weekly progress — tracked automatically as you learn.
+        </p>
+
+        <div style={S.previewFrame}>
+          
+
+          <div style={{ padding: isMobile ? "20px 16px 26px" : "30px 34px 34px" }}>
+            {/* <div style={S.previewBadge}>
+              <span style={S.badgeDot} />
+              12-day streak · keep it going
+            </div> */}
+            <div style={S.previewGreeting}>Good morning, Virendra</div>
+
+            <div style={{
+              ...S.previewStatsGrid,
+              gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
+            }}>
+              {previewStats.map((s, i) => (
+                <div key={i} style={S.previewStatCard}>
+                  <div style={{ ...S.previewStatBar, background: `linear-gradient(90deg,${s.color},${s.color}88)` }} />
+                  <div style={S.previewStatLabel}>{s.label}</div>
+                  <div style={{ ...S.previewStatValue, color: s.color }}>{s.value}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{
+              ...S.previewChartsGrid,
+              gridTemplateColumns: isMobile ? "1fr" : "1.3fr 1fr",
+            }}>
+              <div style={S.previewChartCard}>
+                <div style={S.previewChartLabel}>Learning progress</div>
+                <svg viewBox="0 0 280 100" style={{ width: "100%", height: 100, display: "block" }}>
+                  <defs>
+                    <linearGradient id="previewLineGrad" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#7c3aed" />
+                      <stop offset="100%" stopColor="#a855f7" />
+                    </linearGradient>
+                  </defs>
+                  <polyline points={progressPoints} fill="none" stroke="url(#previewLineGrad)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+
+              <div style={S.previewChartCard}>
+                <div style={S.previewChartLabel}><Activity/>Weekly activity</div>
+                <div style={S.previewBarsRow}>
+                  {previewWeekly.map((d, i) => (
+                    <div key={i} style={S.previewBarCol}>
+                      <div style={{ ...S.previewBarFill, height: `${d.count * 12}px` }} />
+                      <span style={S.previewBarDay}>{d.day}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* FEATURES */}
       <section id="features" style={{
@@ -181,7 +289,7 @@ export default function LandingPage() {
           ...S.sectionTitle,
           fontSize: isMobile ? "clamp(26px, 7vw, 36px)" : "clamp(32px, 4vw, 48px)",
         }}>
-          Everything you need to <span style={S.heroGradient}>master any topic</span>
+          To master any topic
         </h2>
         <p style={{
           ...S.sectionSub,
@@ -238,7 +346,7 @@ export default function LandingPage() {
             ...S.ctaTitle,
             fontSize: isMobile ? "clamp(28px, 8vw, 40px)" : "clamp(36px, 5vw, 56px)",
           }}>
-            Ready to study smarter with VAI?
+            Ready to study with VAI?
           </h2>
           <p style={{
             ...S.ctaSub,
@@ -312,7 +420,7 @@ export default function LandingPage() {
 const S = {
   root: {
     fontFamily: "'DM Sans', sans-serif",
-    background: "#080810",
+    background: "#0b0214",
     color: "#f1f5f9",
     minHeight: "100vh",
     overflowX: "hidden",
@@ -322,7 +430,7 @@ const S = {
     position: "fixed",
     width: 400, height: 400,
     borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%)",
+    background: "radial-gradient(circle, rgba(21, 21, 22, 0.08) 0%, transparent 70%)",
     pointerEvents: "none",
     zIndex: 0,
     transition: "left 0.15s ease, top 0.15s ease",
@@ -403,34 +511,34 @@ const S = {
     alignItems: "center", justifyContent: "center",
     textAlign: "center",
     background: `
-      radial-gradient(ellipse at 30% 20%, rgba(124,58,237,0.18) 0%, transparent 55%),
-      radial-gradient(ellipse at 70% 80%, rgba(59,130,246,0.1) 0%, transparent 55%)
+      radial-gradient(ellipse at 30% 20%, rgba(2, 1, 1, 0.18) 0%, transparent 55%),
+      radial-gradient(ellipse at 70% 80%, rgba(202, 100, 164, 0.1) 0%, transparent 55%)
     `,
   },
   heroBadge: {
     display: "inline-flex", alignItems: "center", gap: 8,
     padding: "6px 16px", borderRadius: 100,
     background: "rgba(124,58,237,0.12)",
-    border: "1px solid rgba(124,58,237,0.3)",
+    border: "1px solid rgba(64, 237, 58, 0.3)",
     fontSize: 13, fontWeight: 600, color: "#c4b5fd",
     marginBottom: 28, letterSpacing: "0.02em",
     animation: "fadeUp 0.6s ease both",
   },
   badgeDot: {
     display: "inline-block", width: 7, height: 7, borderRadius: "50%",
-    background: "#a855f7",
+    background: "#49ad8d",
     boxShadow: "0 0 8px #a855f7",
     animation: "pulse 2s infinite",
   },
   heroTitle: {
     fontFamily: "'Syne', sans-serif",
     fontWeight: 800, lineHeight: 1.05,
-    color: "#f8fafc", letterSpacing: "-0.03em",
+    color: "#6397ca", letterSpacing: "-0.03em",
     marginBottom: 24,
     animation: "fadeUp 0.7s ease 0.1s both",
   },
   heroGradient: {
-    background: "linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #3b82f6 100%)",
+    background: "linear-gradient(135deg, #21ac69 0%, #6366f1 50%, #3b82f6 100%)",
     backgroundSize: "200% 200%",
     WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
     backgroundClip: "text",
@@ -450,7 +558,7 @@ const S = {
   btnHero: {
     display: "inline-flex", alignItems: "center", gap: 10,
     padding: "15px 32px", borderRadius: 10,
-    background: "linear-gradient(135deg, #7c3aed, #a855f7)",
+    background: "linear-gradient(135deg, #3aed43, #a855f7)",
     border: "none", color: "white",
     fontSize: 16, fontWeight: 700, cursor: "pointer",
     boxShadow: "0 8px 30px rgba(124,58,237,0.45)",
@@ -476,7 +584,7 @@ const S = {
   floatCard: {
     display: "flex", alignItems: "center", gap: 12,
     padding: "14px 20px", borderRadius: 14,
-    background: "rgba(255,255,255,0.04)",
+    background: "rgba(143, 31, 31, 0.04)",
     backdropFilter: "blur(20px)",
     border: "1px solid rgba(255,255,255,0.08)",
     boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
@@ -508,6 +616,73 @@ const S = {
     color: "#64748b", maxWidth: 520,
     margin: "0 auto 56px", lineHeight: 1.7,
   },
+  /* ── Live preview (Dashboard mockup) ── */
+  previewFrame: {
+    maxWidth: 980, margin: "0 auto",
+    borderRadius: 20, overflow: "hidden", textAlign: "left",
+    background: "rgba(255,255,255,0.025)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    boxShadow: "0 30px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(124,58,237,0.06)",
+    backdropFilter: "blur(20px)",
+    animation: "fadeUp 0.7s ease both",
+  },
+  previewTopBar: {
+    display: "flex", alignItems: "center", gap: 12,
+    padding: "12px 20px",
+    borderBottom: "1px solid rgba(255,255,255,0.06)",
+    background: "rgba(255,255,255,0.02)",
+  },
+  previewDots: { display: "flex", gap: 6 },
+  previewDot: { width: 9, height: 9, borderRadius: "50%", display: "inline-block", opacity: 0.8 },
+  previewUrl: { marginLeft: "auto", fontSize: 12, color: "#475569" },
+  previewBadge: {
+    display: "inline-flex", alignItems: "center", gap: 8,
+    padding: "5px 14px", borderRadius: 100,
+    background: "rgba(124,58,237,0.12)",
+    border: "1px solid rgba(124,58,237,0.25)",
+    fontSize: 12, fontWeight: 600, color: "#c4b5fd",
+    marginBottom: 12,
+  },
+  previewGreeting: {
+    fontFamily: "'Syne', sans-serif",
+    fontSize: 22, fontWeight: 800, color: "#f8fafc",
+    marginBottom: 22,
+  },
+  previewStatsGrid: {
+    display: "grid", gap: 12, marginBottom: 20,
+  },
+  previewStatCard: {
+    position: "relative", overflow: "hidden",
+    padding: "16px 16px 14px", borderRadius: 14,
+    background: "rgba(255,255,255,0.03)",
+    border: "1px solid rgba(255,255,255,0.07)",
+  },
+  previewStatBar: {
+    position: "absolute", top: 0, left: 0, right: 0, height: 3,
+    borderRadius: "14px 14px 0 0",
+  },
+  previewStatLabel: { fontSize: 11, color: "#64748b", marginBottom: 6 },
+  previewStatValue: { fontFamily: "'Syne', sans-serif", fontSize: 22, fontWeight: 800 },
+  previewChartsGrid: { display: "grid", gap: 14 },
+  previewChartCard: {
+    padding: "18px 20px", borderRadius: 14,
+    background: "rgba(255,255,255,0.03)",
+    border: "1px solid rgba(255,255,255,0.07)",
+  },
+  previewChartLabel: { fontSize: 12, fontWeight: 600, color: "#94a3b8", marginBottom: 12 },
+  previewBarsRow: {
+    display: "flex", alignItems: "flex-end", gap: 10,
+    height: 100, paddingTop: 6,
+  },
+  previewBarCol: {
+    flex: 1, display: "flex", flexDirection: "column",
+    alignItems: "center", justifyContent: "flex-end", gap: 6, height: "100%",
+  },
+  previewBarFill: {
+    width: "100%", maxWidth: 22, borderRadius: "6px 6px 0 0",
+    background: "linear-gradient(180deg,#a855f7,#6366f1)",
+  },
+  previewBarDay: { fontSize: 10, color: "#475569" },
   featuresGrid: {
     display: "grid",
     maxWidth: 960, margin: "0 auto",

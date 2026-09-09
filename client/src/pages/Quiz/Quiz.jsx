@@ -6,6 +6,7 @@ import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import { triggerRateLimitToast } from "../../utils/rateLimitToast";
 import { API_BASE_URL } from "../../config";
+import { Trophy,Brain, CircleX,Sparkles } from "lucide-react";
 
 const getQuizKey = (topic) => {
   const uid = localStorage.getItem("userId") || "guest";
@@ -121,7 +122,7 @@ useEffect(() => {
       saveQuizCache(topic, data.data);
       window.dispatchEvent(new Event("quizCompleted"));
       setCachedAt(new Date().toISOString());
-      addNotification("🧠", `${data.data.length}-question quiz generated for "${topic}"`, "quiz");
+      addNotification(<Quiz/>, `${data.data.length}-question quiz generated for "${topic}"`, "quiz");
       trackQuiz(topic, data.data.length);
     }
   } catch (err) {
@@ -159,7 +160,7 @@ useEffect(() => {
       setScoreSubmitted(false);
       setCurrent(questions.length);
       setTimeLeft(600);
-      addNotification("🧠", `${data.data.length} more questions added for "${topic}"`, "quiz");
+      addNotification(<Brain/>, `${data.data.length} more questions added for "${topic}"`, "quiz");
     }
   } catch {
     setError("Could not connect to server.");
@@ -219,7 +220,7 @@ useEffect(() => {
 
               <div style={{ marginTop:24, padding:"20px 24px", background:"linear-gradient(135deg,rgba(124,58,237,0.1),rgba(99,102,241,0.08))", border:"1px solid rgba(124,58,237,0.25)", borderRadius:14, display:"flex", flexDirection:"column", gap:12 }}>
                 <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                  <span style={{ fontSize:26 }}>🧠</span>
+                  <span style={{ fontSize:26 }}><Brain/></span>
                   <div>
                     <p style={{ fontSize:15, fontWeight:700, color:"#f1f5f9", margin:0 }}>Quiz completed! What next?</p>
                     <p style={{ fontSize:12, color:"#64748b", marginTop:3 }}>
@@ -245,10 +246,21 @@ useEffect(() => {
               {total === 0 && (
                 <div className="quiz-generate-screen">
                   <h2>Quiz — {topic}</h2>
-                  {error && <p style={{ color:"red" }}>❌ {error}</p>}
-                  <button className="flash-btn" onClick={generateQuiz} disabled={loading}>
-                    {loading ? "Generating..." : "✨ Generate AI Quiz"}
-                  </button>
+                  {error && <p style={{ color:"red" }}><CircleX/> {error}</p>}
+                  <button
+  className="flash-btn"
+  onClick={generateQuiz}
+  disabled={loading}
+>
+  {loading ? (
+    "Generating..."
+  ) : (
+    <>
+      <Sparkles size={18} />
+      Generate AI Quiz
+    </>
+  )}
+</button>
                 </div>
               )}
 

@@ -1,3 +1,4 @@
+import { Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -42,7 +43,7 @@ export default function GoogleSuccess() {
   return (
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#080810" }}>
       <div style={{ textAlign:"center", color:"#f1f5f9" }}>
-        <div style={{ fontSize:48, marginBottom:16 }}>⚡</div>
+        <div style={{ fontSize:48, marginBottom:16 }}><Zap size={20}/></div>
         <p style={{ fontSize:16, color:"#94a3b8" }}>{status}</p>
       </div>
     </div>

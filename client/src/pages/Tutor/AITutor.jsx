@@ -2,14 +2,16 @@ import React, { useState, useRef, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import Navbar  from "../../components/Navbar";
 import axios   from "axios";
+import { useLocation } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkMath    from "remark-math";
 import rehypeKatex   from "rehype-katex";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { trackTutor } from "../../utils/history";
+import { trackTutor, startTutorSession } from "../../utils/history";
 import { triggerRateLimitToast } from "../../utils/rateLimitToast";
 import { API_BASE_URL } from "../../config";
+import {FileText, Lightbulb,User} from "lucide-react";
 
 
 // ── Copy button ──
@@ -17,7 +19,17 @@ function CopyBtn({ code }) {
   const [copied, setCopied] = useState(false);
   return (
     <button onClick={() => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(()=>setCopied(false),2000); }} style={CS.copyBtn}>
-      {copied ? "✅ Copied" : "📋 Copy"}
+      {copied ? (
+  <>
+    <CircleCheck size={16} />
+    Copied
+  </>
+) : (
+  <>
+    <Copy size={16} />
+    Copy
+  </>
+)}
     </button>
   );
 }
@@ -36,7 +48,12 @@ function SvgDiagram({ code }) {
 }
 
 // ── Markdown renderer ──
-function BubbleContent({ content }) {
+// Memoized: ReactMarkdown/SyntaxHighlighter/KaTeX are expensive to
+// re-run. Without memo, every keystroke in the input box (which
+// changes unrelated `input` state in the parent) would re-render
+// and re-parse every past AI message's markdown — that's what
+// caused the typing lag.
+const BubbleContent = React.memo(function BubbleContent({ content }) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkMath]}
@@ -74,7 +91,7 @@ function BubbleContent({ content }) {
       }}
     >{content}</ReactMarkdown>
   );
-}
+});
 
 // ── File preview bubble in chat ──
 function FileBubble({ file, previewUrl }) {
@@ -96,45 +113,82 @@ function FileBubble({ file, previewUrl }) {
   );
 }
 
-// ── Chat cache helpers ──
-const getChatKey = () => {
-  const uid = localStorage.getItem("userId") || "guest";
-  return "vai_tutor_" + uid;
-};
-const loadChat = () => {
-  try {
-    const raw = localStorage.getItem(getChatKey());
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-};
-const saveChat = (msgs) => {
-  try { localStorage.setItem(getChatKey(), JSON.stringify(msgs.slice(-50))); }
-  catch {}
-};
-const clearChat = () => {
-  try { localStorage.removeItem(getChatKey()); }
-  catch {}
+// ── Single message row, memoized ──
+// Only re-renders when THIS message's own props change, not when
+// unrelated parent state (like the textarea's `input`) changes.
+// This is the other half of the typing-lag fix.
+const MessageBubble = React.memo(function MessageBubble({ msg }) {
+  return (
+    <div style={{...S.row,...(msg.role==="user"?S.rowUser:{})}}>
+      <div style={S.avatar}>{msg.role==="ai"?<span className="vai-ai-icon">✨</span>:<User/>}</div>
+      <div style={{...S.bubble,...(msg.role==="user"?S.bubbleUser:S.bubbleAI)}}>
+        {msg.files && msg.files.length>0 && (
+          <div style={S.filePreviews}>
+            {msg.files.map((f,j) => (
+              <FileBubble key={j} file={f.file} previewUrl={f.previewUrl}/>
+            ))}
+          </div>
+        )}
+        {msg.content && (
+          msg.role==="ai"
+            ? <BubbleContent content={msg.content}/>
+            : <p style={{margin:0,fontSize:14,lineHeight:1.6}}>{msg.content}</p>
+        )}
+      </div>
+    </div>
+  );
+});
+
+const WELCOME = {
+  id: "welcome",
+  role:"ai",
+  content:"Hello I'm **VAI Tutor**."
 };
 
 // ── Main component ──
 export default function AITutor() {
-  const WELCOME = {
-    role:"ai",
-    content:"Hello 👋 I'm **VAI Tutor**."
+  const location = useLocation();
+
+  // Two ways this page can start:
+  //  1) Opened normally (sidebar/nav) → fresh chat, just WELCOME.
+  //  2) Opened from History with a saved session's exchanges in
+  //     location.state ({ fromHistory, exchanges }) → replay them.
+  const buildInitialMessages = () => {
+    const s = location.state;
+    if (s?.fromHistory && s?.exchanges?.length) {
+      const rebuilt = s.exchanges.flatMap((ex, i) => ([
+        { id: `h_u_${i}`, role: "user", content: ex.q },
+        { id: `h_a_${i}`, role: "ai",   content: ex.a },
+      ]));
+      return [WELCOME, ...rebuilt];
+    }
+    return [WELCOME];
   };
-  const [messages, setMessages] = useState(() => {
-    const cached = loadChat();
-    return cached?.length > 0 ? cached : [WELCOME];
-  });
+
+  const [messages, setMessages] = useState(buildInitialMessages);
   const [input,      setInput]      = useState("");
   const [typing,     setTyping]     = useState(false);
   const [error,      setError]      = useState("");
   const [files,      setFiles]      = useState([]);
   const [showAttach, setShowAttach] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
-  const chatEndRef  = useRef(null);
-  const fileRef     = useRef(null);
-  const imageRef    = useRef(null);
+  const chatEndRef   = useRef(null);
+  const fileRef      = useRef(null);
+  const imageRef     = useRef(null);
+  const sessionIdRef = useRef(null);
+
+  // Re-run whenever we land here with a *new* history selection —
+  // e.g. clicking a different tutor entry in History while already
+  // on /tutor (same route, so the component doesn't remount). Also
+  // starts a fresh session id for this visit, so subsequent messages
+  // you type append to ONE History entry instead of creating a new
+  // one per message.
+  useEffect(() => {
+    setMessages(buildInitialMessages());
+    sessionIdRef.current = startTutorSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages, typing]);
 
@@ -164,11 +218,9 @@ export default function AITutor() {
     const sentFiles = [...files];
     setInput(""); setFiles([]); setError(""); setTyping(true);
 
-    setMessages(p => {
-      const updated = [...p, { role:"user", content:q, files:sentFiles }];
-      saveChat(updated);
-      return updated;
-    });
+    // Local UI state only — the backend call below (trackTutor +
+    // POST /api/tutor/ask) is what makes this durable.
+    setMessages(p => [...p, { id: `u_${Date.now()}`, role:"user", content:q, files:sentFiles }]);
 
     try {
       let payload = { question: q };
@@ -187,12 +239,13 @@ export default function AITutor() {
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
       const answer = res.data.answer;
-      setMessages(p => {
-        const updated = [...p, { role:"ai", content:answer }];
-        saveChat(updated);
-        return updated;
-      });
-      if (q) trackTutor(q, answer);
+      setMessages(p => [...p, { id: `a_${Date.now()}`, role:"ai", content:answer }]);
+
+      // Persists the exchange under this visit's session id — repeated
+      // sends in this same chat update one History entry instead of
+      // creating a new one each time. Full record also lives in
+      // MongoDB via the /ask route itself.
+      if (q) trackTutor(q, answer, sessionIdRef.current);
 
     } catch(err) {
       if (err.response?.status === 429) {
@@ -201,17 +254,19 @@ export default function AITutor() {
       }
       const msg = "❌ Could not reach server.";
       setError(msg);
-      setMessages(p => [...p, { role:"ai", content:msg }]);
+      setMessages(p => [...p, { id: `e_${Date.now()}`, role:"ai", content:msg }]);
     } finally { setTyping(false); }
   };
 
   const onKey = (e) => { if (e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();} };
 
   const clear = () => {
-    const welcome = {role:"ai",content:"Hello 👋 Ask me anything"};
-    setMessages([welcome]);
-    saveChat([welcome]);
+    setMessages([WELCOME]);
     setError(""); setFiles([]);
+    sessionIdRef.current = startTutorSession();
+    // Also drop any history-selection state so a stray remount
+    // doesn't bring the old Q&A back.
+    window.history.replaceState({}, "");
   };
 
   const canSend = (input.trim()||files.length>0) && !typing;
@@ -230,7 +285,6 @@ export default function AITutor() {
         <Navbar />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"/>
 
-        {/* ✅ FIX: removed fixed height, use flex-grow to fill remaining space */}
         <div style={S.container}>
 
           {/* Header */}
@@ -242,33 +296,29 @@ export default function AITutor() {
     </span> 
   
   VAI Tutor</h2>
-              <p style={S.sub}>Chat · Images · Files · Diagrams · Formulas</p>
+              <p style={S.sub}>
+                {location.state?.fromHistory
+                  ? "Viewing a saved conversation"
+                  : "Chat · Images · Files · Diagrams · Formulas"}
+              </p>
             </div>
             <button style={S.clearBtn} onClick={clear}>🗑 Clear</button>
           </div>
 
           {/* Chat box */}
           <div style={S.chatBox}>
-            {messages.map((msg,i) => (
-              <div key={i} style={{...S.row,...(msg.role==="user"?S.rowUser:{})}}>
-                <div style={S.avatar}>{msg.role==="ai"?<span className="vai-ai-icon">
+            {loadingHistory && (
+              <div style={S.row}>
+                <div style={S.avatar}><span className="vai-ai-icon">
       ✨
-    </span>:"👤"}</div>
-                <div style={{...S.bubble,...(msg.role==="user"?S.bubbleUser:S.bubbleAI)}}>
-                  {msg.files && msg.files.length>0 && (
-                    <div style={S.filePreviews}>
-                      {msg.files.map((f,j) => (
-                        <FileBubble key={j} file={f.file} previewUrl={f.previewUrl}/>
-                      ))}
-                    </div>
-                  )}
-                  {msg.content && (
-                    msg.role==="ai"
-                      ? <BubbleContent content={msg.content}/>
-                      : <p style={{margin:0,fontSize:14,lineHeight:1.6}}>{msg.content}</p>
-                  )}
+    </span></div>
+                <div style={{...S.bubble,...S.bubbleAI,...S.typingBubble}}>
+                  <span style={S.dot}/><span style={{...S.dot,animationDelay:"0.2s"}}/><span style={{...S.dot,animationDelay:"0.4s"}}/>
                 </div>
               </div>
+            )}
+            {!loadingHistory && messages.map((msg,i) => (
+              <MessageBubble key={msg.id ?? i} msg={msg}/>
             ))}
 
             {typing && (
@@ -285,13 +335,13 @@ export default function AITutor() {
           </div>
 
           {/* Suggestions */}
-          {messages.length<=1 && (
+          {!loadingHistory && messages.length<=1 && (
             <div style={S.suggestions}>
               {suggestions.map(q=>(
                 <button key={q} style={S.suggBtn} onClick={()=>setInput(q)}
                   onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(124,58,237,0.5)"}
                   onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,0.07)"}
-                >💡 {q}</button>
+                ><Lightbulb/> {q}</button>
               ))}
             </div>
           )}
@@ -320,24 +370,17 @@ export default function AITutor() {
               onChange={e=>handleFiles(Array.from(e.target.files))}/>
 
             <div style={{position:"relative"}}>
-              {/* <button style={{...S.attachBtn,background:showAttach?"rgba(124,58,237,0.2)":"rgba(255,255,255,0.06)"}}
-                onClick={()=>setShowAttach(v=>!v)}
-                title="Attach file or image"
-              >
-                📎
-              </button> */}
-
               {showAttach && (
                 <div style={S.attachMenu}>
                   <button style={S.attachOpt} onClick={()=>{imageRef.current.click();setShowAttach(false);}}>
-                    <span style={S.attachOptIcon}>🖼️</span>
+                    <span style={S.attachOptIcon}><Image/></span>
                     <div>
                       <div style={S.attachOptTitle}>Upload Image</div>
                       <div style={S.attachOptSub}>JPG, PNG, GIF, WebP</div>
                     </div>
                   </button>
                   <button style={S.attachOpt} onClick={()=>{fileRef.current.click();setShowAttach(false);}}>
-                    <span style={S.attachOptIcon}>📄</span>
+                    <span style={S.attachOptIcon}><FileText/></span>
                     <div>
                       <div style={S.attachOptTitle}>Upload File</div>
                       <div style={S.attachOptSub}>PDF, TXT, code files</div>
@@ -374,7 +417,6 @@ export default function AITutor() {
         .katex .mord,.katex .mbin,.katex .mrel,.katex .mopen,.katex .mclose,.katex .mfrac,.katex .minner,.katex .mop{color:#e2d9f3!important;}
         .katex:not(.katex-display .katex){background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.2);border-radius:4px;padding:1px 6px;color:#c4b5fd!important;}
 
-        /*  Mobile fixes */
         @media (max-width: 768px) {
           .tutor-container {
             padding: 12px !important;
@@ -389,18 +431,15 @@ export default function AITutor() {
   );
 }
 
-// ✅ FIXED styles — removed fixed height, use flex to fill space
 const S = {
   container: {
     padding: 24,
     display: "flex",
     flexDirection: "column",
-    //  KEY FIX: instead of height:calc(100vh - 68px) which collapses on mobile,
-    // use flex:1 + minHeight:0 so it grows to fill .page-main properly
     flex: 1,
     minHeight: 0,
     gap: 12,
-    overflow: "hidden",   //  prevent double scrollbars
+    overflow: "hidden",
   },
   header:      { display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexShrink:0 },
   title:       { fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800, background:"linear-gradient(135deg,#a855f7,#3b82f6)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" },

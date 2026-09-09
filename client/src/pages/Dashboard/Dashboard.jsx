@@ -1,5 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Brain,
+  Layers3,
+  CalendarCheck,
+  CalendarDays,
+  FileText,
+  TrendingUp ,Flame ,
+  BookOpen,LayoutDashboard,Play ,Activity,
+} from "lucide-react";
 import Sidebar from "../../components/Sidebar";
 import Navbar  from "../../components/Navbar";
 import axios   from "axios";
@@ -8,14 +17,11 @@ import { API_BASE_URL } from "../../config";
 
 import {
   LineChart, Line, XAxis, YAxis, Tooltip,
-  CartesianGrid, ResponsiveContainer, BarChart, Bar
+  CartesianGrid, ResponsiveContainer, BarChart, Bar,
 } from "recharts";
 
-/* ─── Local history helpers ─────────────────────────── */
-
-const computeStreak = () => {
-  const history = getHistory();
-  const today   = new Date(); today.setHours(0,0,0,0);
+const computeStreak = (history) => {
+  const today = new Date(); today.setHours(0,0,0,0);
   let streak = 0;
   const d = new Date(today);
   while (true) {
@@ -27,9 +33,8 @@ const computeStreak = () => {
   return streak;
 };
 
-const computeWeeklyActivity = () => {
-  const history = getHistory();
-  const days    = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const computeWeeklyActivity = (history) => {
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(new Date().getDate() - (6 - i));
@@ -39,8 +44,7 @@ const computeWeeklyActivity = () => {
   });
 };
 
-const computeDailyProgress = () => {
-  const history   = getHistory();
+const computeDailyProgress = (history) => {
   const allEvents = Object.values(history).flat();
   const total     = allEvents.length;
   const days      = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -64,8 +68,7 @@ const computeDailyProgress = () => {
   });
 };
 
-const getLastActiveTopic = () => {
-  const history = getHistory();
+const getLastActiveTopic = (history) => {
   const all = Object.entries(history)
     .flatMap(([date, events]) => events.map(e => ({ ...e, date })))
     .sort((a, b) => new Date(b.time || b.date) - new Date(a.time || a.date));
@@ -78,11 +81,10 @@ const getLastActiveTopic = () => {
   return match?.[1]?.trim() || null;
 };
 
-const getTopicsFromHistory = () => {
-  const history = getHistory();
-  const all     = Object.values(history).flat();
-  const seen    = new Set();
-  const topics  = [];
+const getTopicsFromHistory = (history) => {
+  const all    = Object.values(history).flat();
+  const seen   = new Set();
+  const topics = [];
 
   const sorted = [...all].sort((a, b) =>
     new Date(b.time || 0) - new Date(a.time || 0)
@@ -159,14 +161,16 @@ function Dashboard() {
   }, []);
 
   const recomputeLocal = useCallback(() => {
-    setStreak(computeStreak());
-    setWeeklyActivity(computeWeeklyActivity());
-    setDailyProgress(computeDailyProgress());
+    const history = getHistory();
 
-    const topics = getTopicsFromHistory();
+    setStreak(computeStreak(history));
+    setWeeklyActivity(computeWeeklyActivity(history));
+    setDailyProgress(computeDailyProgress(history));
+
+    const topics = getTopicsFromHistory(history);
     setLocalTopics(topics);
 
-    const lastTopic = getLastActiveTopic();
+    const lastTopic = getLastActiveTopic(history);
     if (lastTopic) {
       setContinueTopic(lastTopic);
       setFlashcardCount(getFlashcardCountForTopic(lastTopic));
@@ -186,13 +190,22 @@ function Dashboard() {
 
   }, []);
 
+  const recomputeTimerRef = useRef(null);
+  const recomputeLocalDebounced = useCallback(() => {
+    if (recomputeTimerRef.current) clearTimeout(recomputeTimerRef.current);
+    recomputeTimerRef.current = setTimeout(recomputeLocal, 250);
+  }, [recomputeLocal]);
+
   /* ── Events ── */
   useEffect(() => {
     recomputeLocal();
     const events = ["historyUpdated","storage","quizCompleted","flashcardGenerated"];
-    events.forEach(ev => window.addEventListener(ev, recomputeLocal));
-    return () => events.forEach(ev => window.removeEventListener(ev, recomputeLocal));
-  }, [recomputeLocal]);
+    events.forEach(ev => window.addEventListener(ev, recomputeLocalDebounced));
+    return () => {
+      events.forEach(ev => window.removeEventListener(ev, recomputeLocalDebounced));
+      if (recomputeTimerRef.current) clearTimeout(recomputeTimerRef.current);
+    };
+  }, [recomputeLocal, recomputeLocalDebounced]);
 
   /* ── Fetch server stats ── */
   const fetchDashboard = useCallback(async () => {
@@ -218,10 +231,20 @@ function Dashboard() {
 } finally { setLoading(false); }
   }, []);
 
+  const lastFetchRef = useRef(0);
   useEffect(() => {
     fetchDashboard();
-    const onFocus   = () => { recomputeLocal(); fetchDashboard(); };
-    const onVisible = () => { if (document.visibilityState === "visible") { recomputeLocal(); fetchDashboard(); } };
+    lastFetchRef.current = Date.now();
+
+    const maybeRefetch = () => {
+      recomputeLocal();
+      if (Date.now() - lastFetchRef.current > 20000) {
+        fetchDashboard();
+        lastFetchRef.current = Date.now();
+      }
+    };
+    const onFocus   = () => maybeRefetch();
+    const onVisible = () => { if (document.visibilityState === "visible") maybeRefetch(); };
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisible);
     return () => {
@@ -321,19 +344,19 @@ function Dashboard() {
     {
       title: "Day Streak",
       value: `${streak} 🔥`,
-      icon: "🔥", color: "#f59e0b",
+      icon: <Flame size={40}/>,
       sub: streak > 0 ? "Keep it going!" : "Start today!",
     },
     {
       title: "Topics Created",
       value: stats?.topicsCompleted ?? localTopics.length,
-      icon: "📚", color: "#7c3aed",
+      icon: <BookOpen size={40} />,
       sub: `${stats?.totalDocs ?? 0} docs generated`,
     },
     {
       title: "Flashcard Decks",
       value: flashdeckCount > 0 ? flashdeckCount : (stats?.flashcardsReviewed || 0),
-      icon: "🃏", color: "#6366f1",
+      icon: <Layers3 size={40} />,
       sub: flashdeckCount > 0
         ? `${flashdeckCount} topic${flashdeckCount!==1?"s":""} with cards`
         : "Generate flashcards to start",
@@ -341,7 +364,7 @@ function Dashboard() {
     {
       title: "Quiz Accuracy",
       value: `${quizAccuracy > 0 ? quizAccuracy : (stats?.quizAccuracy || 0)}%`,
-      icon: "🎯", color: "#10b981",
+      icon: <Brain size={40} />,
       sub: totalQuizzes > 0
         ? `${totalQuizzes} quiz${totalQuizzes!==1?"zes":""} taken`
         : stats?.totalQuizzes
@@ -351,12 +374,10 @@ function Dashboard() {
   ];
 
   const quickActions = [
-    { title:"Flashcards",    desc:"Review your cards",   icon:"🃏", color:"#6366f1", action:() => goFlashcards(activeTopic), btn:"Study Now"  },
-    { title:"Take a Quiz",   desc:"Test your knowledge", icon:"🧠", color:"#7c3aed", action:() => goQuiz(activeTopic),       btn:"Start Quiz" },
-    { title:"AI Tutor",      desc:"Ask me anything",     icon:<span className="vai-ai-icon">
-      ✨
-    </span>, color:"#a855f7", action:() => navigate("/tutor"),        btn:"Chat Now"   },
-    { title:"Study Planner", desc:"Plan your schedule",  icon:"📅", color:"#3b82f6", action:() => navigate("/planner"),      btn:"View Plan"  },
+    { title:"Flashcards",    desc:"Review your cards",   icon:<Layers3 size={20} /> , color:"#6366f1", action:() => goFlashcards(activeTopic), btn:"Study Now"  },
+    { title:"Take a Quiz",   desc:"Test your knowledge", icon:<Brain  size={20} />, color:"#7c3aed", action:() => goQuiz(activeTopic),       btn:"Start Quiz" },
+    { title:"AI Tutor",      desc:"Ask me anything",     icon:<Brain/>, color:"#a855f7", action:() => navigate("/tutor"),        btn:"Chat Now"   },
+    { title:"Study Planner", desc:"Plan your schedule",  icon:<CalendarCheck size={20} />, color:"#3b82f6", action:() => navigate("/planner"),      btn:"View Plan"  },
   ];
 
   return (
@@ -372,15 +393,12 @@ function Dashboard() {
             <h1 style={{ fontFamily:"'Syne',sans-serif", fontSize:28, fontWeight:800, background:T.headingGrad, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text", marginBottom:6 }}>
               {greeting}, {name.split(" ")[0]} 
             </h1>
-            <p style={{ color:T.subText, fontSize:14 }}>
-              Here's your learning overview for today.
-              {totalWeekActivity > 0 && <span style={{ color:T.purple, fontWeight:600 }}> {totalWeekActivity} activities this week!</span>}
-            </p>
+           
           </div>
 
           {error && (
             <div style={{ background:"rgba(239,68,68,0.1)", border:"1px solid rgba(239,68,68,0.3)", borderRadius:10, padding:"12px 16px", color:"#fca5a5", fontSize:13, marginBottom:20 }}>
-              ⚠️ {error} — showing cached data where available.
+              <TriangleAlert /> {error} — showing cached data where available.
             </div>
           )}
 
@@ -397,7 +415,6 @@ function Dashboard() {
                   <div style={{ width:44, height:44, borderRadius:12, background:`${s.color}18`, border:`1px solid ${s.color}30`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>
                     {s.icon}
                   </div>
-                  <span style={{ fontSize:11, fontWeight:700, padding:"3px 9px", borderRadius:100, background:T.badgeBg, border:`1px solid ${T.badgeBorder}`, color:T.badgeText }}>Live</span>
                 </div>
                 <div style={{ fontSize:11, fontWeight:700, color:T.dimText, textTransform:"uppercase", letterSpacing:"0.07em", marginBottom:4 }}>{s.title}</div>
                 <div style={{ fontFamily:"'Syne',sans-serif", fontSize:30, fontWeight:800, color:s.color, lineHeight:1, marginBottom:6 }}>{s.value}</div>
@@ -412,14 +429,13 @@ function Dashboard() {
             <div style={card()}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
                 <div>
-                  <h3 style={{ fontSize:15, fontWeight:700, color:T.titleText }}>📈 Learning Progress</h3>
-                  <p style={{ fontSize:12, color:T.dimText, marginTop:3 }}>Cumulative activity this week</p>
+                  <h3 style={{ fontSize:15, fontWeight:700, color:T.titleText }}><TrendingUp size={20} />  Learning Progress</h3>
                 </div>
                 <span style={{ fontSize:11, fontWeight:700, padding:"4px 10px", borderRadius:100, background:T.badgeBg, border:`1px solid ${T.badgeBorder}`, color:T.badgeText }}>This Week</span>
               </div>
               {dailyProgress.every(d => d.progress === 0) ? (
                 <div style={{ height:220, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:8 }}>
-                  <span style={{ fontSize:36 }}>📊</span>
+                  <span style={{ fontSize:36 }}><LayoutDashboard size={20} /></span>
                   <p style={{ color:T.dimText, fontSize:13 }}>No activity yet this week</p>
                   <p style={{ color:T.dimText, fontSize:12, textAlign:"center" }}>Generate docs, flashcards or take a quiz to see progress</p>
                 </div>
@@ -446,8 +462,8 @@ function Dashboard() {
             <div style={card()}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
                 <div>
-                  <h3 style={{ fontSize:15, fontWeight:700, color:T.titleText }}>⚡ Weekly Activity</h3>
-                  <p style={{ fontSize:12, color:T.dimText, marginTop:3 }}>Docs, quizzes & flashcards</p>
+                  <h3 style={{ fontSize:15, fontWeight:700, color:T.titleText }}><Activity size= {20}/> Weekly Activity</h3>
+
                 </div>
                 <span style={{ fontSize:11, fontWeight:700, padding:"4px 10px", borderRadius:100, background:T.badgeBg, border:`1px solid ${T.badgeBorder}`, color:T.badgeText }}>
                   {totalWeekActivity} total
@@ -455,7 +471,7 @@ function Dashboard() {
               </div>
               {totalWeekActivity === 0 ? (
                 <div style={{ height:220, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:8 }}>
-                  <span style={{ fontSize:36 }}>📅</span>
+                  <span style={{ fontSize:36 }}><CalendarDays size={20} /></span>
                   <p style={{ color:T.dimText, fontSize:13 }}>No activity recorded yet</p>
                   <p style={{ color:T.dimText, fontSize:12 }}>Start learning to see your activity here</p>
                 </div>
@@ -484,7 +500,7 @@ function Dashboard() {
 
             {/* Your Topics */}
             <div style={card()}>
-              <h3 style={boxTitle}>📚 Your Topics</h3>
+              <h3 style={boxTitle}><BookOpen size={20} />  Your Topics</h3>
               {allTopics.length > 0 ? (
                 <div style={{ display:"flex", flexDirection:"column", gap:8, marginTop:12 }}>
                   {allTopics.map((topic, i) => (
@@ -494,7 +510,7 @@ function Dashboard() {
                       onMouseLeave={e => { e.currentTarget.style.background=T.itemBg; e.currentTarget.style.borderColor=T.itemBorder; }}
                     >
                       <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                        <span style={{ fontSize:16 }}>📚</span>
+                        <span style={{ fontSize:16 }}><BookOpen size={20} /></span>
                         <span style={{ fontSize:13, color:T.bodyText, fontWeight:500 }}>{topic}</span>
                       </div>
                       <span style={{ color:T.purple, fontSize:14 }}>→</span>
@@ -503,7 +519,7 @@ function Dashboard() {
                 </div>
               ) : (
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", padding:"24px 0", gap:8 }}>
-                  <span style={{ fontSize:36 }}>📚</span>
+                  <span style={{ fontSize:36 }}><BookOpen size={20} /> </span>
                   <p style={{ color:T.dimText, fontSize:13 }}>No topics yet</p>
                   <button onClick={() => navigate("/topics")}
                     style={{ padding:"8px 16px", borderRadius:8, background:"linear-gradient(135deg,#7c3aed,#a855f7)", border:"none", color:"white", fontSize:13, fontWeight:600, cursor:"pointer", marginTop:4 }}>
@@ -515,11 +531,11 @@ function Dashboard() {
 
             {/* Continue Learning */}
             <div style={card({ background:T.continueBg, border:`1px solid ${T.continueBorder}` })}>
-              <h3 style={boxTitle}>▶️ Continue Learning</h3>
+              <h3 style={boxTitle}><Play  size={20}/> Continue Learning</h3>
               {activeTopic ? (
                 <div style={{ marginTop:12 }}>
                   <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
-                    <div style={{ width:42, height:42, borderRadius:10, background:"rgba(124,58,237,0.15)", border:"1px solid rgba(124,58,237,0.25)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>📚</div>
+                    <div style={{ width:42, height:42, borderRadius:10, background:"rgba(124,58,237,0.15)", border:"1px solid rgba(124,58,237,0.25)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}><BookOpen size={20} /></div>
                     <div>
                       <p style={{ fontSize:15, fontWeight:700, color:T.titleText, margin:0 }}>{activeTopic}</p>
                       <p style={{ fontSize:12, color:T.dimText, marginTop:2 }}>
@@ -539,7 +555,7 @@ function Dashboard() {
                       onMouseEnter={e => e.currentTarget.style.opacity="0.85"}
                       onMouseLeave={e => e.currentTarget.style.opacity="1"}
                     >
-                      🃏 {activeFlashCount > 0 ? `Review ${activeFlashCount} Cards` : "Generate Flashcards"}
+                      <Layers3 size={20} /> {activeFlashCount > 0 ? `Review ${activeFlashCount} Cards` : "Generate Flashcards"}
                     </button>
                     <button
                       style={{ flex:1, padding:"11px 12px", borderRadius:9, background:activeQuizCount>0?"linear-gradient(135deg,#7c3aed,#a855f7)":"linear-gradient(135deg,#6d28d9,#8b5cf6)", border:"none", color:"white", fontSize:13, fontWeight:700, cursor:"pointer", boxShadow:"0 4px 14px rgba(124,58,237,0.4)", fontFamily:"inherit", transition:"all 0.2s" }}
@@ -547,7 +563,7 @@ function Dashboard() {
                       onMouseEnter={e => e.currentTarget.style.opacity="0.85"}
                       onMouseLeave={e => e.currentTarget.style.opacity="1"}
                     >
-                      🧠 {activeQuizCount > 0 ? `Take Quiz (${activeQuizCount}Q)` : "Generate Quiz"}
+                      <Brain size={20} /> {activeQuizCount > 0 ? `Take Quiz (${activeQuizCount}Q)` : "Generate Quiz"}
                     </button>
                   </div>
                   <p style={{ fontSize:11, color:T.dimText, marginTop:10, textAlign:"center" }}>
@@ -556,7 +572,7 @@ function Dashboard() {
                 </div>
               ) : (
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", padding:"24px 0", gap:8 }}>
-                  <span style={{ fontSize:36 }}>🎯</span>
+                  <span style={{ fontSize:36 }}><Brain size={20} /></span>
                   <p style={{ color:T.dimText, fontSize:13 }}>No active topic yet</p>
                   <p style={{ color:T.dimText, fontSize:12, textAlign:"center" }}>Create a topic and generate flashcards or a quiz</p>
                   <button onClick={() => navigate("/topics")}
@@ -569,7 +585,7 @@ function Dashboard() {
 
             {/* Recent Docs */}
             <div style={card()}>
-              <h3 style={boxTitle}>📄 Recent Docs</h3>
+              <h3 style={boxTitle}><FileText size={20} /> Recent Docs</h3>
               {stats?.recentNotes?.length > 0 ? (
                 <div style={{ display:"flex", flexDirection:"column", gap:8, marginTop:12 }}>
                   {stats.recentNotes.map((note, i) => (
@@ -579,7 +595,7 @@ function Dashboard() {
                       onMouseLeave={e => { e.currentTarget.style.background=T.itemBg; e.currentTarget.style.borderColor=T.itemBorder; }}
                     >
                       <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                        <span style={{ fontSize:16 }}>📄</span>
+                        <span style={{ fontSize:16 }}><FileText size={20} /></span>
                         <span style={{ fontSize:13, color:T.bodyText, fontWeight:500 }}>{note}</span>
                       </div>
                       <span style={{ color:"#6366f1", fontSize:14 }}>→</span>
@@ -588,7 +604,7 @@ function Dashboard() {
                 </div>
               ) : (
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", padding:"24px 0", gap:8 }}>
-                  <span style={{ fontSize:36 }}>📄</span>
+                  <span style={{ fontSize:36 }}><FileText size={60} /></span>
                   <p style={{ color:T.dimText, fontSize:13 }}>No docs generated yet</p>
                   <button onClick={() => navigate("/docs")}
                     style={{ padding:"8px 16px", borderRadius:8, background:"linear-gradient(135deg,#6366f1,#818cf8)", border:"none", color:"white", fontSize:13, fontWeight:600, cursor:"pointer", marginTop:4 }}>
@@ -601,7 +617,7 @@ function Dashboard() {
 
           {/* QUICK ACTIONS */}
           <div>
-            <h3 style={{ ...boxTitle, marginBottom:16 }}>⚡ Quick Actions</h3>
+            <h3 style={{ ...boxTitle, marginBottom:16 }}> Quick Actions</h3>
             <div className="bottom-grid">
               {quickActions.map((action, i) => (
                 <div key={i}

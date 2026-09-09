@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
+import { FileUp, Sparkle, Trophy,Brain ,ListChecks, Lightbulb, Timer,Map, ChartNoAxesColumnIncreasing, Goal, Zap} from "lucide-react";
 
 function QuizHome() {
   const navigate   = useNavigate();
@@ -42,7 +43,7 @@ function QuizHome() {
         <Navbar />
         <div style={S.page}>
           <div style={S.header}>
-            <h1 style={S.title}>🧠 Quizzes</h1>
+            <h1 style={S.title}><Brain size={40} /> Quizzes</h1>
             <p style={S.sub}>Upload a file or enter a topic to generate an AI-powered MCQ quiz</p>
           </div>
 
@@ -71,7 +72,7 @@ function QuizHome() {
                   <div style={S.dropContent}><span style={{fontSize:48}}>📂</span><p style={{color:"#a855f7",fontSize:16,fontWeight:700,marginTop:10}}>Drop it here!</p></div>
                 ) : (
                   <div style={S.dropContent}>
-                    <div style={S.uploadBox}><span style={{fontSize:38}}>☁️</span></div>
+                    <div style={S.uploadBox}><span style={{fontSize:38}}><FileUp size={50} /> </span></div>
                     <p style={S.dropTitle}>Drag & drop your file here</p>
                     <p style={S.dropSub}>AI will generate quiz from the file content</p>
                     <div style={S.tags}>
@@ -108,14 +109,14 @@ function QuizHome() {
               {error && <div style={S.err}>❌ {error}</div>}
 
               <button style={{...S.genBtn,opacity:!topic.trim()?0.55:1}} onClick={generate} disabled={!topic.trim()}>
-                <span>🧠</span> Generate {count}-Question Quiz <span>→</span>
+                <span><Sparkle size={20} /></span> Generate {count}-Question Quiz <span>→</span>
               </button>
             </div>
 
             {/* RIGHT */}
             <div style={S.rightPanel}>
               <div style={S.sideCard}>
-                <h3 style={S.sideTitle}>⚡ Quick Start</h3>
+                <h3 style={S.sideTitle}><Zap/> Quick Start</h3>
                 <p style={S.sideSub}>Click any topic to fill it in</p>
                 <div style={S.qGrid}>
                   {QUICK.map(t=>(
@@ -125,13 +126,13 @@ function QuizHome() {
               </div>
 
               <div style={S.sideCard}>
-                <h3 style={S.sideTitle}>🎯 Quiz Features</h3>
+                <h3 style={S.sideTitle}><Goal size={20}/>Quiz Features</h3>
                 {[
-                  {i:"📝",t:"MCQ Format",    d:"4 options, 1 correct answer"},
-                  {i:"💡",t:"Explanations",  d:"AI explains each correct answer"},
-                  {i:"⏱",t:"10-min Timer",   d:"Real exam simulation"},
-                  {i:"🗺",t:"Navigator",      d:"Jump to any question"},
-                  {i:"📊",t:"Score Report",   d:"Full review after submit"},
+                  {i:<ListChecks size={20} />,t:"MCQ Format",    d:"4 options, 1 correct answer"},
+                  {i:<Lightbulb size={20} />,t:"Explanations",  d:"AI explains each correct answer"},
+                  {i:<Timer size={20} />,t:"10-min Timer",   d:"Real exam simulation"},
+                  {i:<Map size={20} />,t:"Navigator",      d:"Jump to any question"},
+                  {i:<ChartNoAxesColumnIncreasing size={20}/>,t:"Score Report",   d:"Full review after submit"},
                 ].map(f=>(
                   <div key={f.t} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:12}}>
                     <span style={{fontSize:18,flexShrink:0}}>{f.i}</span>

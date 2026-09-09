@@ -5,11 +5,15 @@ if (!process.env.GEMINI_API_KEY) {
 }
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// gemini-2.0-flash is on Google's deprecation schedule, and
+// gemini-1.5-flash / gemini-1.5-flash-8b are already fully retired
+// (404 NOT_FOUND, same as gemini-1.5-flash was for the tutor endpoint).
+// Sticking to the current live Gemini 2.5 family, which is GA-stable.
 const MODELS = [
   "gemini-2.5-flash",
-  "gemini-2.0-flash",
-  "gemini-1.5-flash",
-  "gemini-1.5-flash-8b",
+  "gemini-2.5-flash-lite",
+  "gemini-2.5-pro",
 ];
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -28,7 +32,11 @@ const generateWithGemini = async (prompt, retries = 3) => {
         });
 
         console.log(`✅ Success with model: ${model}`);
-        return response.text();   //  FIXED — was response.text (missing parentheses)
+        // @google/genai returns `text` as a property (getter), not a
+        // method — every official SDK example uses `response.text`
+        // with no parentheses. Calling it as a function throws
+        // "response.text is not a function".
+        return response.text;
 
       } catch (error) {
         lastError = error;
@@ -39,8 +47,8 @@ const generateWithGemini = async (prompt, retries = 3) => {
           await wait(delay);
           continue;
         }
-        if (status === 400) {
-          console.warn(`⚠️  Model ${model} bad request. Trying next model...`);
+        if (status === 400 || status === 404) {
+          console.warn(`⚠️  Model ${model} unavailable/invalid (${status}). Trying next model...`);
           break;
         }
         if (status === 401) {

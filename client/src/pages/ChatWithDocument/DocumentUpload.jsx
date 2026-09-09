@@ -1,3 +1,4 @@
+import { FileText } from "lucide-react";
 import { useRef, useState } from "react";
 
 const DocumentUpload = ({ onUpload, uploading }) => {
@@ -68,7 +69,7 @@ const DocumentUpload = ({ onUpload, uploading }) => {
         >
 
           <div className="upload-icon">
-            <span>↑</span>
+            <span><FileText size={20}/></span>
           </div>
 
           <div className="upload-title">

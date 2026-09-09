@@ -5,6 +5,7 @@ import {
   getChatHistory,
   sendMessage,
 } from "../../services/documentChatService";
+import {Brain, User} from "lucide-react";
 
 const ChatWindow = ({ document }) => {
   const [messages, setMessages] = useState([]);
@@ -104,15 +105,9 @@ const ChatWindow = ({ document }) => {
 
         <div className="empty-features">
 
-          <span><span className="vai-ai-icon">
-      ✨
-    </span> Ask questions</span>
-          <span><span className="vai-ai-icon">
-      ✨
-    </span> Summarize</span>
-          <span><span className="vai-ai-icon">
-      ✨
-    </span> Find information</span>
+          <span><Brain/> Ask questions</span>
+          <span><Brain/> Summarize</span>
+          <span><Brain/> Find information</span>
         </div>
 
         <style>{`
@@ -150,40 +145,16 @@ const ChatWindow = ({ document }) => {
             </div>
           </div>
         </div>
-
-        <div className="header-actions">
-          <button title="Document information">ⓘ</button>
-          <button title="More">⋮</button>
-        </div>
       </header>
 
       {/* Messages */}
       <div className="messages-area" ref={scrollRef}>
         {messages.length === 0 ? (
           <div className="conversation-start">
-            <div className="ai-orb"><span className="vai-ai-icon">
-      ✨
-    </span></div>
+            <div className="ai-orb"><Brain/></div>
             <h2>Ask anything about this PDF</h2>
             <p>I can answer questions using the information inside your document.</p>
 
-            <div className="suggestions">
-              <button onClick={() => setInput("Summarize this document")}>
-               <span className="vai-ai-icon">
-      ✨
-    </span> Summarize this document
-              </button>
-              <button onClick={() => setInput("What are the main concepts?")}>
-                <span className="vai-ai-icon">
-      ✨
-    </span>Main concepts
-              </button>
-              <button onClick={() => setInput("Explain this document simply")}>
-                <span className="vai-ai-icon">
-      ✨
-    </span>Explain simply
-              </button>
-            </div>
           </div>
         ) : (
           <div className="message-container">
@@ -193,9 +164,7 @@ const ChatWindow = ({ document }) => {
                 className={`chat-row ${message.role === "user" ? "chat-row-user" : ""}`}
               >
                 <div className="chat-avatar">
-                  {message.role === "assistant" ? <span className="vai-ai-icon">
-      ✨
-    </span> : "👤"}
+                  {message.role === "assistant" ? <Brain/> : <User size = {20}/>}
                 </div>
 
                 <div className="chat-col">
@@ -220,9 +189,7 @@ const ChatWindow = ({ document }) => {
 
             {loading && (
               <div className="chat-row">
-                <div className="chat-avatar"><span className="vai-ai-icon">
-      ✨
-    </span></div>
+                <div className="chat-avatar"><Brain/></div>
                 <div className="chat-bubble chat-bubble-ai chat-typing">
                   <span className="chat-dot" />
                   <span className="chat-dot" style={{ animationDelay: "0.2s" }} />
@@ -238,8 +205,6 @@ const ChatWindow = ({ document }) => {
       <div className="input-area">
         <form onSubmit={send}>
           <div className="input-box">
-            <button type="button" className="attach-button">+</button>
-
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}

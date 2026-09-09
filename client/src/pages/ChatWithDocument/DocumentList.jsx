@@ -1,3 +1,5 @@
+import { useState } from "react";
+import {BookOpen} from "lucide-react"
 const DocumentList = ({
   documents,
   selectedDocument,
@@ -5,6 +7,24 @@ const DocumentList = ({
   onDelete,
   loading,
 }) => {
+  const [pendingDelete, setPendingDelete] = useState(null);
+
+  const requestDelete = (e, document) => {
+    e.stopPropagation();
+    setPendingDelete(document);
+  };
+
+  const confirmDelete = () => {
+    if (pendingDelete) {
+      onDelete(pendingDelete._id);
+    }
+    setPendingDelete(null);
+  };
+
+  const cancelDelete = () => {
+    setPendingDelete(null);
+  };
+
   return (
     <div className="document-list">
 
@@ -19,7 +39,7 @@ const DocumentList = ({
         </div>
       ) : documents.length === 0 ? (
         <div className="empty-documents">
-          <div>📚</div>
+          <div><BookOpen size={20}/></div>
           <span>No documents yet</span>
         </div>
       ) : (
@@ -65,16 +85,50 @@ const DocumentList = ({
 
                 <button
                   className="delete-document"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(document._id);
-                  }}
+                  title="Delete document"
+                  onClick={(e) => requestDelete(e, document)}
                 >
-                  ⋮
+                  🗑️
                 </button>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {pendingDelete && (
+        <div className="confirm-overlay" onClick={cancelDelete}>
+          <div
+            className="confirm-dialog"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="confirm-icon">🗑️</div>
+
+            <div className="confirm-title">
+              Delete document?
+            </div>
+
+            <div className="confirm-message">
+              "{pendingDelete.fileName}" and its chat history
+              will be permanently deleted. This can't be undone.
+            </div>
+
+            <div className="confirm-actions">
+              <button
+                className="confirm-cancel"
+                onClick={cancelDelete}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="confirm-delete"
+                onClick={confirmDelete}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -236,11 +290,23 @@ const DocumentList = ({
 
           cursor: pointer;
 
-          font-size: 16px;
+          font-size: 13px;
+
+          opacity: .6;
+
+          transition: opacity .2s;
+
+          flex-shrink: 0;
+
+          padding: 4px;
+
+          border-radius: 6px;
         }
 
         .delete-document:hover {
-          color: #f87171;
+          opacity: 1;
+
+          background: rgba(248,113,113,.1);
         }
 
         .empty-documents {
@@ -288,6 +354,142 @@ const DocumentList = ({
           50% {
             opacity: .3;
           }
+        }
+
+        /* CONFIRM DIALOG */
+
+        .confirm-overlay {
+          position: fixed;
+
+          inset: 0;
+
+          z-index: 200;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          background: rgba(5,5,10,.6);
+
+          backdrop-filter: blur(6px);
+
+          animation: fadeIn .15s ease;
+        }
+
+        .confirm-dialog {
+          width: 320px;
+
+          max-width: calc(100vw - 40px);
+
+          padding: 22px;
+
+          border-radius: 18px;
+
+          text-align: center;
+
+          background:
+            linear-gradient(
+              160deg,
+              rgba(30,30,42,.98),
+              rgba(15,15,22,.98)
+            );
+
+          border: 1px solid rgba(255,255,255,.09);
+
+          box-shadow: 0 30px 80px rgba(0,0,0,.5);
+        }
+
+        .confirm-icon {
+          width: 46px;
+          height: 46px;
+
+          margin: 0 auto 12px;
+
+          border-radius: 14px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          font-size: 20px;
+
+          background: rgba(248,113,113,.12);
+
+          border: 1px solid rgba(248,113,113,.25);
+        }
+
+        .confirm-title {
+          font-size: 15px;
+
+          font-weight: 700;
+
+          color: #f1f1f5;
+        }
+
+        .confirm-message {
+          margin-top: 8px;
+
+          font-size: 12px;
+
+          line-height: 1.6;
+
+          color: #8f8fa3;
+        }
+
+        .confirm-actions {
+          display: flex;
+
+          gap: 8px;
+
+          margin-top: 18px;
+        }
+
+        .confirm-cancel,
+        .confirm-delete {
+          flex: 1;
+
+          padding: 10px;
+
+          border-radius: 10px;
+
+          font-size: 12px;
+
+          font-weight: 600;
+
+          cursor: pointer;
+
+          border: 1px solid transparent;
+        }
+
+        .confirm-cancel {
+          background: rgba(255,255,255,.05);
+
+          border-color: rgba(255,255,255,.09);
+
+          color: #d5d5df;
+        }
+
+        .confirm-cancel:hover {
+          background: rgba(255,255,255,.09);
+        }
+
+        .confirm-delete {
+          background: linear-gradient(135deg, #ef4444, #b91c1c);
+
+          color: white;
+
+          box-shadow: 0 8px 25px rgba(239,68,68,.25);
+        }
+
+        .confirm-delete:hover {
+          filter: brightness(1.08);
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
       `}</style>
     </div>

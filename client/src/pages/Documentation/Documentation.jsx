@@ -12,6 +12,7 @@ import { triggerRateLimitToast } from "../../utils/rateLimitToast";
 import { API_BASE_URL } from "../../config";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import {FileText,Copy,Check ,Pin,CalendarDays,Clipboard, CircleX, FileDown, Save,RefreshCw, RotateCcw  } from "lucide-react";
 
 function CopyBtn({ code }) {
   const [copied, setCopied] = useState(false);
@@ -20,7 +21,7 @@ function CopyBtn({ code }) {
       onClick={() => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(()=>setCopied(false),2000); }}
       style={CS.copyBtn}
     >
-      {copied ? "✅ Copied" : "📋 Copy"}
+      {copied ? <Check   size={20}/> : <Copy  size={20}/>}
     </button>
   );
 }
@@ -102,8 +103,8 @@ const clearCache = (topic) => {
 };
 
 const PLACEHOLDER = (topic) => topic
-  ? `# ${topic}\n\nClick **✨ Generate AI** to create full documentation for this topic.`
-  : `# Documentation\n\nClick **✨ Generate AI** to get started.`;
+  ? `# ${topic}\n\nClick **Generate AI** to create full documentation for this topic.`
+  : `# Documentation\n\nClick **Generate AI** to get started.`;
 
 function Documentation() {
   const location   = useLocation();
@@ -191,7 +192,7 @@ function Documentation() {
       const savedAt = new Date().toISOString();
       setCachedAt(savedAt);
       saveCache(topicName, { content: newContent, genCount: newCount, savedAt });
-      addNotification("📄", `Documentation generated for "${topicName}"`, "doc");
+      addNotification(<FileText size={20}/>, `Documentation generated for "${topicName}"`, "doc");
       trackDoc(topicName);
     } catch {
       setError("Cannot connect to server.");
@@ -303,12 +304,12 @@ ${markdownToHtml(content)}
           {/* HEADER */}
           <div style={S.header}>
             <div>
-              <h1 style={S.title}>📄 {topicName}</h1>
+              <h1 style={S.title}><FileText size={20}/> {topicName}</h1>
               <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
                 <p style={S.sub}>AI-Generated Documentation</p>
                 {fromHistory && (
                   <span style={{fontSize:11,color:"#60a5fa",background:"rgba(59,130,246,0.1)",border:"1px solid rgba(59,130,246,0.25)",borderRadius:100,padding:"2px 10px",fontWeight:600}}>
-                    📅 Opened from History
+                    <CalendarDays /> Opened from History
                   </span>
                 )}
               </div>
@@ -316,29 +317,21 @@ ${markdownToHtml(content)}
 
             <div style={S.actions}>
               <input ref={fileRef} type="file" accept=".pdf,.txt" style={{display:"none"}} onChange={handleFile} />
-              {file ? (
-                <div style={S.filePill}>
-                  <span style={{fontSize:13}}>📄 {file.name.length>18?file.name.slice(0,18)+"…":file.name}</span>
-                  <button style={S.removeFile} onClick={removeFile}>✕</button>
-                </div>
-              ) : (
-                <button style={S.ghostBtn} onClick={()=>fileRef.current.click()}>📎 Upload File</button>
-              )}
               <button style={{...S.primaryBtn,opacity:loading?0.7:1}} onClick={generate} disabled={loading}>
                 {loading ? <><span style={S.spinner}/>Generating…</> : "✨ Generate AI"}
               </button>
               <div style={{display:"flex",gap:0}}>
-                <button style={{...S.ghostBtn,borderRadius:"8px 0 0 8px",borderRight:"none"}} onClick={exportPDF} disabled={exporting}>📥 PDF</button>
-                <button style={{...S.ghostBtn,borderRadius:"0 8px 8px 0"}} onClick={exportTxt}>TXT</button>
+                <button style={{...S.ghostBtn,borderRadius:"8px 0 0 8px",borderRight:"none"}} onClick={exportPDF} disabled={exporting}><FileDown/> PDF</button>
+                <button style={{...S.ghostBtn,borderRadius:"0 8px 8px 0"}} onClick={exportTxt}><FileText/>TXT</button>
               </div>
               
             </div>
           </div>
 
           {file && (
-            <div style={S.fileBanner}>📄 Using: <strong>{file.name}</strong> ({(file.size/1024).toFixed(1)} KB)</div>
+            <div style={S.fileBanner}><FileText size={20}/> Using: <strong>{file.name}</strong> ({(file.size/1024).toFixed(1)} KB)</div>
           )}
-          {error && <div style={S.errorBanner}>❌ {error}</div>}
+          {error && <div style={S.errorBanner}><CircleX/> {error}</div>}
 
           <div style={S.body}>
 
@@ -366,10 +359,10 @@ ${markdownToHtml(content)}
                     </div>
                     <div style={{display:"flex",gap:8}}>
                       <button style={S.moreBtn} onClick={generate} disabled={loading}>
-                        {loading?"Generating…":"🔄 Generate More"}
+                        {loading ? ("Generating…") : (<><RefreshCw size={18} />Generate More</>)}
                       </button>
                       <button style={S.freshBtn} onClick={()=>{ clearCache(topicName); setContent(PLACEHOLDER(topicName)); setGenerated(false); setGenCount(0); setCachedAt(null); }}>
-                        ↺ Fresh Start
+                        <RotateCcw/> Fresh Start
                       </button>
                     </div>
                   </div>
@@ -380,13 +373,13 @@ ${markdownToHtml(content)}
             {/* SIDEBAR */}
             <div style={S.sidebar}>
               <div style={S.sideCard}>
-                <h3 style={S.sideTitle}>📌 Topic</h3>
+                <h3 style={S.sideTitle}><Pin/> Topic</h3>
                 <div style={S.topicBadge}>{topicName}</div>
-                {file && <p style={{fontSize:11,color:"#475569",marginTop:8}}>📎 {file.name}</p>}
+                {file && <p style={{fontSize:11,color:"#475569",marginTop:8}}><Paperclip/> {file.name}</p>}
               </div>
 
               <div style={S.sideCard}>
-                <h3 style={S.sideTitle}>📋 Contents</h3>
+                <h3 style={S.sideTitle}><Clipboard/> Contents</h3>
                 <div style={{display:"flex",flexDirection:"column",gap:3,marginTop:10}}>
                   {content.split("\n").filter(line=>line.startsWith("## ")).map(line=>line.replace(/^## /,"").trim()).map(item=>(
                     <div key={item} style={S.tocItem}
@@ -407,10 +400,10 @@ ${markdownToHtml(content)}
               </div>
 
               <div style={S.sideCard}>
-                <h3 style={S.sideTitle}>💾 Export</h3>
+                <h3 style={S.sideTitle}><Save/> Export</h3>
                 <p style={{fontSize:12,color:"#64748b",marginBottom:12,marginTop:6}}>Save your documentation</p>
-                <button style={S.exportCardBtn} onClick={exportPDF}>📥 Export as PDF</button>
-                <button style={{...S.exportCardBtn,marginTop:8,background:"rgba(255,255,255,0.04)"}} onClick={exportTxt}>📄 Export as TXT</button>
+                <button style={S.exportCardBtn} onClick={exportPDF}><FileDown/> Export as PDF</button>
+                <button style={{...S.exportCardBtn,marginTop:8,background:"rgba(255,255,255,0.04)"}} onClick={exportTxt}><FileText size={20}/> Export as TXT</button>
               </div>
             </div>
           </div>

@@ -3,6 +3,7 @@ import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import axios from "axios";
 import { API_BASE_URL } from "../../config";
+import {FileText,Flame,Trophy,Brain,ListChecks,Check, Copy, Target, Edit, CircleX,Bookmark, Zap} from "lucide-react";
 
 function Profile() {
   const [user, setUser] = useState({
@@ -65,10 +66,10 @@ function Profile() {
   ];
 
   const achievements = [
-    { icon:"🔥", label:"7-Day Streak",  earned: stats.streak     >= 7  },
-    { icon:"📚", label:"10 Topics",     earned: stats.topics     >= 10 },
-    { icon:"🎯", label:"First Quiz",    earned: stats.quizScore  > 0   },
-    { icon:"⚡", label:"Speed Learner", earned: stats.flashcards >= 50 },
+    { icon:<Flame/>, label:"7-Day Streak",  earned: stats.streak     >= 7  },
+    { icon:<FileText size={20}/>, label:"10 Topics",     earned: stats.topics     >= 10 },
+    { icon:<ListChecks size={20} />, label:"First Quiz",    earned: stats.quizScore  > 0   },
+    { icon:<Zap/>, label:"Speed Learner", earned: stats.flashcards >= 50 },
   ];
 
   return (
@@ -101,7 +102,7 @@ function Profile() {
 
               <h2 style={S.userName}>{user.name}</h2>
               <p  style={S.userEmail}>{user.email}</p>
-              <div style={S.badge}>⚡ Active Learner</div>
+              <div style={S.badge}><Flame/> Active Learner</div>
 
               {/* Stats */}
               <div style={S.statsBox}>
@@ -119,16 +120,16 @@ function Profile() {
               <div style={S.cardHeader}>
                 <h3 style={S.cardTitle}>Personal Information</h3>
                 {!editing
-                  ? <button style={S.editBtn}   onClick={() => setEditing(true)}>✏️ Edit</button>
+                  ? <button style={S.editBtn}   onClick={() => setEditing(true)}><Edit/> Edit</button>
                   : <div style={{display:"flex",gap:8}}>
                       <button style={S.cancelBtn} onClick={() => setEditing(false)}>Cancel</button>
-                      <button style={S.saveBtn}   onClick={saveProfile}>💾 Save</button>
+                      <button style={S.saveBtn}   onClick={saveProfile}><Bookmark/> Save</button>
                     </div>
                 }
               </div>
 
-              {success && <div style={S.successBanner}>✅ {success}</div>}
-              {error   && <div style={S.errorBanner}>❌ {error}</div>}
+              {success && <div style={S.successBanner}><Check/> {success}</div>}
+              {error   && <div style={S.errorBanner}><CircleX/> {error}</div>}
 
               <div style={S.fields}>
                 <div style={S.field}>
@@ -154,12 +155,12 @@ function Profile() {
 
               {/* Achievements */}
               <div style={{marginTop:24}}>
-                <h4 style={S.sectionLabel}>🏆 Achievements</h4>
+                <h4 style={S.sectionLabel}><Trophy size={20}/> Achievements</h4>
 
                 {/* Only show earned achievements */}
                 {achievements.filter(a => a.earned).length === 0 ? (
                   <div style={S.noAchieve}>
-                    <span style={{fontSize:32}}>🎯</span>
+                    <span style={{fontSize:32}}><Target/></span>
                     <p style={{fontSize:13, color:"#475569", fontWeight:600, marginTop:8}}>No achievements yet</p>
                     <p style={{fontSize:12, color:"#334155", marginTop:4}}>
                       Create topics, take quizzes and study daily to earn badges
@@ -171,7 +172,7 @@ function Profile() {
                       <div key={i} style={{...S.achieveCard, background:"rgba(124,58,237,0.1)", borderColor:"rgba(124,58,237,0.3)"}}>
                         <span style={{fontSize:24}}>{a.icon}</span>
                         <span style={{fontSize:11, color:"#a855f7", marginTop:4, textAlign:"center", fontWeight:700}}>{a.label}</span>
-                        <span style={{fontSize:9, color:"#10b981", fontWeight:700}}>✅ EARNED</span>
+                        <span style={{fontSize:9, color:"#10b981", fontWeight:700}}><Check/> EARNED</span>
                       </div>
                     ))}
                   </div>

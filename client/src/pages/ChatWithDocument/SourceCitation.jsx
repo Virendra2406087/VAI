@@ -1,3 +1,5 @@
+
+import {BookOpen,FileText} from "lucide-react";
 const SourceCitation = ({ sources }) => {
   if (!sources?.length) {
     return null;
@@ -6,13 +8,13 @@ const SourceCitation = ({ sources }) => {
   return (
     <div className="citation-wrap">
       <p className="citation-label">
-        📚 Sources
+        <BookOpen size={20}/> Sources
       </p>
 
       <div className="citation-list">
         {sources.map((source, index) => (
           <div key={index} className="citation-card">
-            <span className="citation-icon">📄</span>
+            <span className="citation-icon"><FileText size={20}/></span>
 
             <span className="citation-name">
               {source.fileName || "Document"}
@@ -31,7 +33,7 @@ const SourceCitation = ({ sources }) => {
         .citation-wrap {
           margin-top: 8px;
 
-          max-width: 75%;
+          max-width: 100%;
 
           align-self: flex-start;
         }
@@ -53,35 +55,43 @@ const SourceCitation = ({ sources }) => {
         .citation-list {
           display: flex;
 
-          flex-direction: column;
+          flex-direction: row;
 
-          gap: 5px;
+          flex-wrap: wrap;
+
+          gap: 6px;
         }
 
         .citation-card {
-          display: flex;
+          display: inline-flex;
 
           align-items: center;
 
-          gap: 8px;
+          gap: 6px;
 
-          padding: 7px 11px;
+          padding: 6px 11px;
 
-          border-radius: 10px;
+          border-radius: 999px;
 
           background: rgba(255,255,255,.03);
 
           border: 1px solid rgba(255,255,255,.06);
 
           font-size: 11px;
+
+          white-space: nowrap;
+
+          flex-shrink: 0;
         }
 
         .citation-icon {
-          font-size: 12px;
+          font-size: 11px;
         }
 
         .citation-name {
           color: #b9b9c8;
+
+          max-width: 140px;
 
           overflow: hidden;
 
@@ -91,16 +101,22 @@ const SourceCitation = ({ sources }) => {
         }
 
         .citation-page {
-          margin-left: auto;
+          color: #8b8b9e;
 
-          color: #6f6f82;
+          padding-left: 6px;
+
+          border-left: 1px solid rgba(255,255,255,.08);
 
           flex-shrink: 0;
         }
 
         @media(max-width: 600px) {
           .citation-wrap {
-            max-width: 88%;
+            max-width: 100%;
+          }
+
+          .citation-name {
+            max-width: 90px;
           }
         }
       `}</style>

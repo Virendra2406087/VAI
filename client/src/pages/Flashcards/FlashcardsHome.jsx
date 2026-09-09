@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
-
+import {LayoutDashboard,Layers3, FileUp,MessageCircleQuestion,Target,RefreshCw, Zap, Sparkle, CircleX} from "lucide-react"
 function FlashcardsHome() {
   const navigate   = useNavigate();
   const fileRef    = useRef(null);
@@ -42,7 +42,7 @@ function FlashcardsHome() {
         <Navbar />
         <div style={S.page}>
           <div style={S.header}>
-            <h1 style={S.title}>🃏 Flashcards</h1>
+            <h1 style={S.title}><Layers3 size={20}/> Flashcards</h1>
             <p style={S.sub}>Upload a file or enter a topic to generate AI-powered flashcards</p>
           </div>
 
@@ -71,7 +71,7 @@ function FlashcardsHome() {
                   <div style={S.dropContent}><span style={{fontSize:48}}>📂</span><p style={{color:"#a855f7",fontSize:16,fontWeight:700,marginTop:10}}>Drop it here!</p></div>
                 ) : (
                   <div style={S.dropContent}>
-                    <div style={S.uploadBox}><span style={{fontSize:38}}>☁️</span></div>
+                    <div style={S.uploadBox}><span style={{fontSize:38}}><FileUp size={50} /> </span></div>
                     <p style={S.dropTitle}>Drag & drop your file here</p>
                     <p style={S.dropSub}>or click to browse</p>
                     <div style={S.tags}>
@@ -103,17 +103,17 @@ function FlashcardsHome() {
                 </div>
               </div>
 
-              {error && <div style={S.err}>❌ {error}</div>}
+              {error && <div style={S.err}><CircleX/> {error}</div>}
 
               <button style={{...S.genBtn,opacity:!topic.trim()?0.55:1}} onClick={generate} disabled={!topic.trim()}>
-                <span>✨</span> Generate {count} Flashcards <span>→</span>
+                <span><Sparkle/></span> Generate {count} Flashcards <span>→</span>
               </button>
             </div>
 
             {/* RIGHT */}
             <div style={S.rightPanel}>
               <div style={S.sideCard}>
-                <h3 style={S.sideTitle}>⚡ Quick Start</h3>
+                <h3 style={S.sideTitle}><Zap/> Quick Start</h3>
                 <p style={S.sideSub}>Click any topic to fill it in</p>
                 <div style={S.qGrid}>
                   {QUICK.map(t=>(
@@ -122,12 +122,12 @@ function FlashcardsHome() {
                 </div>
               </div>
               <div style={S.sideCard}>
-                <h3 style={S.sideTitle}>🃏 What you get</h3>
+                <h3 style={S.sideTitle}><Layers3 size={20}/> What you get</h3>
                 {[
-                  {i:"❓",t:"Q&A Format",   d:"Question on front, answer on back"},
-                  {i:"🎯",t:"Difficulty",    d:"Rated Easy / Medium / Hard"},
-                  {i:"🔄",t:"Flip Animation",d:"Smooth 3D card flip"},
-                  {i:"📊",t:"Progress Track",d:"Track easy, medium, hard counts"},
+                  {i:<MessageCircleQuestion size = {20}/>,t:"Q&A Format",   d:"Question on front, answer on back"},
+                  {i:<Target size= {20}/>,t:"Difficulty",    d:"Rated Easy / Medium / Hard"},
+                  {i:<RefreshCw size={20} />,t:"Flip Animation",d:"Smooth 3D card flip"},
+                  {i:<LayoutDashboard size={20} />,t:"Progress Track",d:"Track easy, medium, hard counts"},
                 ].map(f=>(
                   <div key={f.t} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:12}}>
                     <span style={{fontSize:18,flexShrink:0}}>{f.i}</span>
