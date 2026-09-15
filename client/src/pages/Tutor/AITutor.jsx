@@ -11,7 +11,7 @@ import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { trackTutor, startTutorSession } from "../../utils/history";
 import { triggerRateLimitToast } from "../../utils/rateLimitToast";
 import { API_BASE_URL } from "../../config";
-import {FileText, Lightbulb,User} from "lucide-react";
+import { FileText, Lightbulb, User, Copy, CircleCheck, Image } from "lucide-react";
 
 
 // ── Copy button ──

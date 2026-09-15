@@ -10,12 +10,17 @@ if (!process.env.GEMINI_API_KEY) {
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // ── Model fallback chain: try each in order until one works ──
-// gemini-1.5-flash / gemini-1.5-pro were fully retired and now 404 —
-// they can't serve as fallbacks anymore. gemini-2.5-flash-lite is a
-// cheaper/faster sibling that's often available when 2.5-flash is
-// overloaded; gemini-2.5-pro is the highest-quality last resort.
-// All three are GA-stable (scheduled shutdown is Oct 16, 2026, not yet).
-const MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro"];
+// gemini-1.5-flash / gemini-1.5-pro were fully retired (404).
+// gemini-2.5-flash-lite was retired too (404) as of Sep 2026 —
+// replaced with gemini-3.5-flash-lite per Google's own error message.
+// gemini-2.5-pro is the highest-quality last resort.
+const MODELS = ["gemini-2.5-flash", "gemini-3.5-flash-lite", "gemini-2.5-pro"];
+
+// Statuses worth failing over on:
+//  503 = overloaded, 429 = quota, 404 = model retired/not found.
+// Anything else (bad request, auth, etc.) isn't fixed by trying a
+// different model, so we still rethrow those immediately.
+const RETRYABLE_STATUSES = [503, 429, 404];
 
 const generateWithFallback = async (params) => {
   let lastError;
@@ -24,8 +29,7 @@ const generateWithFallback = async (params) => {
       const response = await ai.models.generateContent({ ...params, model });
       return response;
     } catch (err) {
-      // 503 = overloaded, 429 = quota — try next model
-      if (err.status === 503 || err.status === 429) {
+      if (RETRYABLE_STATUSES.includes(err.status)) {
         console.warn(`⚠️ Model ${model} unavailable (${err.status}), trying next...`);
         lastError = err;
         await new Promise(r => setTimeout(r, 1500)); // wait 1.5s before retry
